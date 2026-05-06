@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hilo — The Origin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg:       #0d0a0e;
+      --gold:     #c9a84c;
+      --gold-lt:  #e8c97a;
+      --cream:    #f5ede0;
+      --purple-dk:#2e1f3a;
+      --purple-md:#4a2d5c;
+      --card-bg:  rgba(18, 10, 26, 0.84);
+      --card-bdr: rgba(201, 168, 76, 0.28);
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: var(--bg);
+      overflow: hidden;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      user-select: none;
+    }
+
+    /* ── Background ─────────────────────────────── */
+    #bg-canvas {
+      position: fixed; inset: 0;
+      width: 100%; height: 100%;
+      z-index: 0; display: block;
+    }
+
+    /* ── Film Grain ─────────────────────────────── */
+    .grain-overlay {
+      position: fixed; inset: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      opacity: 0.06;
+      mix-blend-mode: overlay;
+      z-index: 50;
+    }
+
+    /* ── Stage — perspective root, NOT preserve-3d ─ */
+    #stage {
+      position: fixed; inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      perspective: 1100px;
+      perspective-origin: 50% 50%;
+      z-index: 10;
+      cursor: grab;
+    }
+    #stage.dragging { cursor: grabbing; }
+
+    /* ── Carousel — preserve-3d root ───────────────
+       RULES: no overflow, no filter, no opacity<1,
+       no mix-blend-mode on this element or ancestors  */
+    #carousel {
+      position: relative;
+      width:  clamp(300px, 40vw, 480px);
+      height: clamp(420px, 62vh, 640px);
+      transform-style: preserve-3d;
+    }
+
+    /* ── Cards ──────────────────────────────────── */
+    .card {
+      position: absolute; inset: 0;
+      border-radius: 16px;
+      overflow: hidden;                          /* safe — card is NOT preserve-3d */
+      background: var(--card-bg);
+      border: 1px solid var(--card-bdr);
+      box-shadow:
+        inset 0 0 40px rgba(201,168,76,0.04),
+        0 18px 55px rgba(0,0,0,0.5);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transform-origin: 50% 50% 0;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      /* Default: hidden off-screen right */
+      opacity: 0;
+      transform: translateX(140%) rotateY(-52deg) scale(0.5) translateZ(-320px);
+      pointer-events: none;
+    }
+
+    /* ── Card State Classes ─────────────────────── */
+    .card.s-active {
+      opacity: 1;
+      transform: translateX(0) rotateY(0deg) scale(1) translateZ(0);
+      box-shadow:
+        inset 0 0 60px rgba(201,168,76,0.07),
+        0 40px 100px rgba(0,0,0,0.72),
+        0 0 70px rgba(201,168,76,0.09);
+      pointer-events: auto;
+    }
+    .card.s-prev {
+      opacity: 0.5;
+      transform: translateX(-72%) rotateY(44deg) scale(0.76) translateZ(-150px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+    .card.s-next {
+      opacity: 0.5;
+      transform: translateX(72%) rotateY(-44deg) scale(0.76) translateZ(-150px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    }
+    .card.s-far-left {
+      opacity: 0;
+      transform: translateX(-145%) rotateY(52deg) scale(0.5) translateZ(-320px);
+    }
+    .card.s-far-right {
+      opacity: 0;
+      transform: translateX(145%) rotateY(-52deg) scale(0.5) translateZ(-320px);
+    }
+
+    /* ── Transition Profiles ────────────────────── */
+    .card.t-enter {
+      transition:
+        transform  0.65s cubic-bezier(0.16, 1, 0.3, 1),
+        opacity    0.48s ease,
+        box-shadow 0.48s ease;
+    }
+    .card.t-exit {
+      transition:
+        transform  0.52s cubic-bezier(0.55, 0, 1, 0.45),
+        opacity    0.38s ease,
+        box-shadow 0.38s ease;
+    }
+    .card.t-side {
+      transition:
+        transform  0.58s cubic-bezier(0.16, 1, 0.3, 1),
+        opacity    0.45s ease,
+        box-shadow 0.45s ease;
+    }
+
+    /* ── Page-load fly-in ───────────────────────── */
+    @keyframes cardFlyIn {
+      0%   { opacity:0; transform: translateX(0) translateZ(-950px) rotateY(18deg) scale(0.18); }
+      52%  { opacity:1; }
+      80%  { transform: translateX(0) translateZ(28px) rotateY(-5deg) scale(1.03); }
+      100% { opacity:1; transform: translateX(0) translateZ(0) rotateY(0deg) scale(1); }
+    }
+    .card.fly-in {
+      animation: cardFlyIn 1.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    /* ── Glare ──────────────────────────────────── */
+    .glare {
+      position: absolute; inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      opacity: 0;
+      background: radial-gradient(circle at 50% 30%, rgba(255,230,160,0.13) 0%, transparent 55%);
+      transition: opacity 0.35s ease;
+      z-index: 3;
+    }
+
+    /* ── Card Inner Layout ──────────────────────── */
+    .card-inner {
+      position: relative; z-index: 1;
+      width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 44px 36px;
+      gap: 20px;
+    }
+    .card-inner--has-image {
+      justify-content: flex-start;
+      padding-top: 38px;
+    }
+
+    /* ── Card Typography ────────────────────────── */
+    .card-ornament {
+      font-size: 13px;
+      letter-spacing: 0.35em;
+      color: rgba(201,168,76,0.55);
+      font-weight: 300;
+    }
+    .card-text {
+      font-size: clamp(21px, 3.1vw, 35px);
+      font-style: italic;
+      font-weight: 400;
+      line-height: 1.9;
+      letter-spacing: 0.01em;
+      text-align: center;
+      color: var(--cream);
+    }
+    .card-text--sm {
+      font-size: clamp(17px, 2.4vw, 27px);
+      line-height: 1.8;
+    }
+    .card-text--final {
+      font-size: clamp(20px, 2.9vw, 33px);
+      font-weight: 600;
+      line-height: 2;
+    }
+
+    /* ── Card Image ─────────────────────────────── */
+    .card-image-wrap {
+      position: relative;
+      width: 100%;
+      flex: 1;
+      min-height: 0;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .card-image {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      border-radius: inherit;
+      background: rgba(46,31,58,0.5); /* fallback */
+    }
+    .card-image-tint {
+      position: absolute; inset: 0;
+      border-radius: inherit;
+      background: rgba(201,168,76,0.18);
+      mix-blend-mode: multiply;
+      pointer-events: none;
+    }
+
+    /* ── Prompt ─────────────────────────────────── */
+    #prompt {
+      position: fixed;
+      bottom: 6vh; left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      font-size: clamp(11px, 1.2vw, 15px);
+      font-style: italic;
+      font-weight: 300;
+      letter-spacing: 0.14em;
+      white-space: nowrap;
+      color: rgba(245,237,224,0.45);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.9s ease;
+    }
+    #prompt.visible {
+      opacity: 1;
+      animation: promptBreathe 3s ease-in-out infinite;
+    }
+    @keyframes promptBreathe {
+      0%,100% { opacity: 0.28; }
+      50%      { opacity: 0.62; }
+    }
+
+    /* ── Fade Overlay ───────────────────────────── */
+    #fade-overlay {
+      position: fixed; inset: 0;
+      background: #000;
+      opacity: 1;
+      z-index: 100;
+      transition: opacity 0.8s ease;
+    }
+
+    /* ── Reduced Motion ─────────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      .card, .card.fly-in { animation: none !important; transition: none !important; }
+      .card.s-active { opacity:1; transform: none; }
+      #prompt.visible { animation: none; opacity: 0.5; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ① Background (owner replaces JS block) -->
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- ② Film Grain -->
+  <svg class="grain-overlay" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+    <defs>
+      <filter id="gf" x="0%" y="0%" width="100%" height="100%" color-interpolation-filters="sRGB">
+        <feTurbulence id="gt" type="fractalNoise" baseFrequency="0.68" numOctaves="4" seed="7" stitchTiles="stitch"/>
+        <feColorMatrix type="saturate" values="0"/>
+      </filter>
+    </defs>
+    <rect width="100%" height="100%" filter="url(#gf)"/>
+  </svg>
+
+  <!-- ③ Stage + Carousel -->
+  <div id="stage">
+    <div id="carousel">
+
+      <!-- Slide 1 — Text only -->
+      <div class="card" data-slide="0">
+        <div class="glare"></div>
+        <div class="card-inner">
+          <span class="card-ornament">——</span>
+          <p class="card-text">
+            first i made a 1&nbsp;page<br>
+            no animations<br>
+            silly website
+          </p>
+        </div>
+      </div>
+
+      <!-- Slide 2 — Minecraft world -->
+      <div class="card" data-slide="1">
+        <div class="glare"></div>
+        <div class="card-inner card-inner--has-image">
+          <p class="card-text card-text--sm">
+            then i made a Minecraft world<br>
+            where i put your pictures
+          </p>
+          <div class="card-image-wrap">
+            <img src="./assets/minecraft-world.jpg" alt="Minecraft world" class="card-image"/>
+            <div class="card-image-tint"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 3 — Minimal website -->
+      <div class="card" data-slide="2">
+        <div class="glare"></div>
+        <div class="card-inner card-inner--has-image">
+          <p class="card-text card-text--sm">
+            then i made a website<br>
+            with minimal design<br>
+            and a video edit of you
+          </p>
+          <div class="card-image-wrap">
+            <img src="./assets/minimal-site.jpg" alt="Minimal website" class="card-image"/>
+            <div class="card-image-tint"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide 4 — Final statement -->
+      <div class="card" data-slide="3">
+        <div class="glare"></div>
+        <div class="card-inner">
+          <p class="card-text card-text--final">
+            But this is different.<br>
+            This shows you my skills<br>
+            without the nerdy parts.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ④ Prompt -->
+  <p id="prompt">swipe left</p>
+
+  <!-- ⑤ Fade overlay -->
+  <div id="fade-overlay"></div>
+
+
+  <script>
+  /* ── PLACEHOLDER BACKGROUND ─────────────────────────────────────
+     OWNER: Replace everything inside this IIFE with your own shader. */
+  (function(){
+    const cv = document.getElementById('bg-canvas');
+    const cx = cv.getContext('2d');
+    function resize(){ cv.width=innerWidth; cv.height=innerHeight; }
+    resize();
+    window.addEventListener('resize', resize);
+    function draw(){
+      const w=cv.width, h=cv.height, t=Date.now()*0.00038;
+      cx.fillStyle='#0d0a0e'; cx.fillRect(0,0,w,h);
+      const p1=cx.createRadialGradient(w*(.18+.14*Math.sin(t*.9)),h*(.22+.12*Math.cos(t*.7)),0,w*.18,h*.22,w*.72);
+      p1.addColorStop(0,'rgba(74,45,92,.55)'); p1.addColorStop(1,'rgba(0,0,0,0)');
+      cx.fillStyle=p1; cx.fillRect(0,0,w,h);
+      const p2=cx.createRadialGradient(w*(.72+.1*Math.cos(t*.65)),h*(.52+.14*Math.sin(t*.85)),0,w*.72,h*.52,w*.58);
+      p2.addColorStop(0,'rgba(201,168,76,.09)'); p2.addColorStop(1,'rgba(0,0,0,0)');
+      cx.fillStyle=p2; cx.fillRect(0,0,w,h);
+      const p3=cx.createRadialGradient(w*(.5+.07*Math.sin(t*1.2)),h*(.88+.05*Math.cos(t*.8)),0,w*.5,h*.88,w*.65);
+      p3.addColorStop(0,'rgba(46,31,58,.6)'); p3.addColorStop(1,'rgba(0,0,0,0)');
+      cx.fillStyle=p3; cx.fillRect(0,0,w,h);
+      requestAnimationFrame(draw);
+    }
+    draw();
+  })();
+
+  /* ── FILM GRAIN ──────────────────────────────────────────────── */
+  (function(){
+    const t=document.getElementById('gt'); let s=7;
+    setInterval(()=>{ s=(s%199)+1; t.setAttribute('seed',s); },80);
+  })();
+
+  /* ── CAROUSEL ────────────────────────────────────────────────── */
+  const cards       = Array.from(document.querySelectorAll('.card'));
+  const promptEl    = document.getElementById('prompt');
+  const fadeOverlay = document.getElementById('fade-overlay');
+  const TOTAL       = cards.length;
+  const ALL_STATES  = ['s-active','s-prev','s-next','s-far-left','s-far-right'];
+  const ALL_TRANS   = ['t-enter','t-exit','t-side'];
+
+  let idx         = 0;   // current slide index
+  let busy        = false;
+  let promptTimer = null;
+
+  function offsetToState(o){
+    if(o===0)  return 's-active';
+    if(o===-1) return 's-prev';
+    if(o===1)  return 's-next';
+    return o<0 ? 's-far-left' : 's-far-right';
+  }
+
+  function applyState(card, state, trans){
+    ALL_STATES.forEach(c=>card.classList.remove(c));
+    ALL_TRANS.forEach(c=>card.classList.remove(c));
+    if(trans) card.classList.add(trans);
+    card.classList.add(state);
+  }
+
+  /* ── TILT (lerp + rAF — premium feel) ──────────────────────── */
+  let rafId=null, tTX=0, tTY=0, tCX=0, tCY=0, tCard=null;
+  const lerp=(a,b,t)=>a+(b-a)*t;
+
+  function tiltLoop(){
+    tCX=lerp(tCX,tTX,.075);
+    tCY=lerp(tCY,tTY,.075);
+    if(tCard){
+      tCard.style.transform=
+        `translateX(0) rotateX(${tCX}deg) rotateY(${tCY}deg) scale(1.015) translateZ(0)`;
+      const g=tCard.querySelector('.glare');
+      if(g){
+        const px=(tCY/10+1)/2*100;
+        const py=(-tCX/10+1)/2*100;
+        g.style.background=`radial-gradient(circle at ${px}% ${py}%, rgba(255,228,155,0.13) 0%, transparent 55%)`;
+        g.style.opacity='1';
+      }
+    }
+    rafId=requestAnimationFrame(tiltLoop);
+  }
+
+  function startTilt(card){
+    tCard=card; tTX=0; tTY=0; tCX=0; tCY=0;
+    if(!rafId) tiltLoop();
+    card.addEventListener('mousemove', onTM);
+    card.addEventListener('mouseleave', onTL);
+  }
+
+  function onTM(e){
+    const r=tCard.getBoundingClientRect();
+    tTY=((e.clientX-r.left)/r.width*2-1)*10;
+    tTX=-((e.clientY-r.top)/r.height*2-1)*10;
+  }
+  function onTL(){ tTX=0; tTY=0; }
+
+  function stopTilt(){
+    if(rafId){ cancelAnimationFrame(rafId); rafId=null; }
+    if(tCard){
+      tCard.style.transform='';
+      const g=tCard.querySelector('.glare');
+      if(g) g.style.opacity='0';
+      tCard.removeEventListener('mousemove',onTM);
+      tCard.removeEventListener('mouseleave',onTL);
+      tCard=null;
+    }
+    tTX=0; tTY=0; tCX=0; tCY=0;
+  }
+
+  /* ── PROMPT ─────────────────────────────────────────────────── */
+  function showPrompt(){
+    promptEl.textContent = idx < TOTAL-1 ? 'swipe left' : 'click anywhere';
+    promptEl.classList.add('visible');
+  }
+  function hidePrompt(){
+    promptEl.classList.remove('visible');
+    clearTimeout(promptTimer);
+  }
+  function schedulePrompt(){
+    clearTimeout(promptTimer);
+    promptTimer=setTimeout(showPrompt, 1600);
+  }
+
+  /* ── NEXT SLIDE ─────────────────────────────────────────────── */
+  function nextSlide(){
+    if(busy || idx>=TOTAL-1) return;
+    busy=true;
+    hidePrompt();
+    stopTilt();                          // clear inline transform FIRST
+
+    const next=idx+1;
+    cards.forEach((card,i)=>{
+      const cur=i-idx, nxt=i-next;
+      let trans='t-side';
+      if(cur===0) trans='t-exit';
+      else if(cur===1) trans='t-enter';
+      applyState(card, offsetToState(nxt), trans);
+      card.style.pointerEvents=nxt===0?'auto':'none';
+    });
+    idx=next;
+
+    setTimeout(()=>{
+      busy=false;
+      startTilt(cards[idx]);
+      schedulePrompt();
+    }, 700);
+  }
+
+  /* ── SWIPE / DRAG ────────────────────────────────────────────── */
+  (function(){
+    const stage=document.getElementById('stage');
+    let sx=0, sy=0, dragging=false, moved=false;
+
+    stage.addEventListener('mousedown',(e)=>{
+      sx=e.clientX; sy=e.clientY; dragging=true; moved=false;
+      stage.classList.add('dragging');
+    });
+    window.addEventListener('mousemove',(e)=>{
+      if(!dragging) return;
+      if(Math.abs(e.clientX-sx)>8) moved=true;
+    });
+    window.addEventListener('mouseup',(e)=>{
+      if(!dragging) return;
+      dragging=false; stage.classList.remove('dragging');
+      if(moved && e.clientX-sx < -55) nextSlide();
+    });
+
+    stage.addEventListener('touchstart',(e)=>{
+      sx=e.touches[0].clientX; sy=e.touches[0].clientY;
+      dragging=true; moved=false;
+    },{passive:true});
+
+    stage.addEventListener('touchmove',(e)=>{
+      if(!dragging) return;
+      const dx=e.touches[0].clientX-sx, dy=e.touches[0].clientY-sy;
+      if(!moved && Math.abs(dx)>Math.abs(dy) && Math.abs(dx)>12) moved=true;
+      if(moved) e.preventDefault();
+    },{passive:false});
+
+    stage.addEventListener('touchend',(e)=>{
+      if(!dragging) return; dragging=false;
+      if(moved && e.changedTouches[0].clientX-sx < -50) nextSlide();
+    },{passive:true});
+  })();
+
+  /* ── CLICK — slide 4 only → page 03 ────────────────────────── */
+  document.addEventListener('click',()=>{
+    if(idx!==TOTAL-1 || busy) return;
+    busy=true; hidePrompt();
+    fadeOverlay.style.pointerEvents='auto';
+    fadeOverlay.style.opacity='1';
+    setTimeout(()=>{ window.location.href='page03.html'; },820);
+  });
+
+  /* ── PAGE ENTRY ─────────────────────────────────────────────── */
+  (function(){
+    const rm=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Position side cards instantly (no transition)
+    cards.forEach((card,i)=>{
+      if(i>0) card.classList.add(i===1?'s-next':'s-far-right');
+      card.style.pointerEvents='none';
+    });
+
+    // Fade page in from black
+    requestAnimationFrame(()=>{
+      setTimeout(()=>{
+        fadeOverlay.style.opacity='0';
+        fadeOverlay.addEventListener('transitionend',()=>{
+          fadeOverlay.style.pointerEvents='none';
+        },{once:true});
+      },40);
+    });
+
+    if(rm){
+      cards[0].classList.add('s-active');
+      cards[0].style.pointerEvents='auto';
+      startTilt(cards[0]);
+      schedulePrompt();
+      return;
+    }
+
+    // Fly-in after fade starts
+    setTimeout(()=>{
+      // Give side cards their transitions now
+      cards.forEach((c,i)=>{ if(i>0) c.classList.add('t-side'); });
+
+      const ac=cards[0];
+      ac.classList.add('fly-in');
+
+      function onEnd(e){
+        if(e.animationName!=='cardFlyIn') return;
+        ac.removeEventListener('animationend',onEnd);
+        ac.classList.remove('fly-in');
+        ac.classList.add('s-active','t-enter');
+        ac.style.pointerEvents='auto';
+        startTilt(ac);
+        schedulePrompt();
+      }
+      ac.addEventListener('animationend',onEnd);
+
+      // Fallback
+      setTimeout(()=>{
+        if(!ac.classList.contains('s-active')){
+          ac.classList.remove('fly-in');
+          ac.classList.add('s-active','t-enter');
+          ac.style.pointerEvents='auto';
+          startTilt(ac);
+          schedulePrompt();
+        }
+      },1600);
+    },280);
+  })();
+  </script>
+
+</body>
+</html>
