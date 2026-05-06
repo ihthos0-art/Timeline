@@ -87,7 +87,7 @@
       position: relative;
       display: inline-block;
       padding: 48px 72px;
-      perspective: 700px;
+      perspective: 480px;
       transform-style: preserve-3d;
     }
 
@@ -120,21 +120,33 @@
       transform-style: preserve-3d;
       will-change: transform;
 
-      /* Entry animation — lands with weight */
-      animation: hiloFlyIn 1.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+      /* Entry animation — spins in, lands with weight */
+      animation: hiloFlyIn 1.5s cubic-bezier(0.22, 1, 0.36, 1) both;
     }
 
     @keyframes hiloFlyIn {
       0% {
         opacity: 0;
-        transform: translateY(-130vh) scale(0.65);
+        transform: translateY(-130vh) rotateY(260deg) scale(0.45);
         filter:
           drop-shadow(0 0 0px rgba(201, 168, 76, 0))
           drop-shadow(0 0 0px rgba(0, 0, 0, 0));
       }
+      60% {
+        opacity: 1;
+      }
+      80% {
+        transform: translateY(14px) rotateY(-10deg) scale(1.03);
+        filter:
+          drop-shadow(0 0 80px rgba(201, 168, 76, 0.35))
+          drop-shadow(0 8px 32px rgba(0, 0, 0, 0.9));
+      }
+      92% {
+        transform: translateY(-5px) rotateY(4deg) scale(0.98);
+      }
       100% {
         opacity: 1;
-        transform: translateY(0) scale(1);
+        transform: translateY(0) rotateY(0deg) scale(1);
         filter:
           drop-shadow(0 0 60px rgba(201, 168, 76, 0.22))
           drop-shadow(0 8px 32px rgba(0, 0, 0, 0.9));
@@ -248,7 +260,7 @@
   <!-- ③ Hilo — perspective wrapper + title -->
   <div id="scene">
     <div id="hilo-wrap" role="presentation">
-      <h1 id="hilo-title">Hilo</h1>
+      <h1 id="hilo-title">Hilo!</h1>
     </div>
   </div>
 
@@ -349,13 +361,15 @@
      * HILO — 3D TILT ON HOVER
      * ───────────────────────────────────────────────────────── */
     (function initTilt() {
-      const title        = document.getElementById('hilo-title');
-      const wrap         = document.getElementById('hilo-wrap');
+      const title         = document.getElementById('hilo-title');
+      const wrap          = document.getElementById('hilo-wrap');
       const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      let tiltEnabled    = false;
+      let tiltEnabled     = false;
+      let enabledOnce     = false;
 
       function enableTilt() {
-        /* Lock the visual state before handing off to JS transforms */
+        if (enabledOnce) return;
+        enabledOnce = true;
         title.style.animation = 'none';
         title.style.opacity   = '1';
         title.style.transform = 'rotateX(0deg) rotateY(0deg)';
@@ -365,11 +379,14 @@
       if (reducedMotion) {
         enableTilt();
       } else {
+        /* Primary trigger: animation finishes */
         title.addEventListener('animationend', function onEntry(e) {
           if (e.animationName !== 'hiloFlyIn') return;
           title.removeEventListener('animationend', onEntry);
           enableTilt();
         });
+        /* Fallback: fire after anim duration + buffer, no matter what */
+        setTimeout(enableTilt, 1600);
       }
 
       wrap.addEventListener('mousemove', function (e) {
@@ -379,13 +396,11 @@
         const cx   = rect.left + rect.width  / 2;
         const cy   = rect.top  + rect.height / 2;
 
-        /* Normalized -1 → +1 within the hover zone */
         const nx = (e.clientX - cx) / (rect.width  / 2);
         const ny = (e.clientY - cy) / (rect.height / 2);
 
-        /* Clamp to avoid extreme angles at zone edges */
-        const rotY =  Math.max(-15, Math.min(15,  nx * 15));
-        const rotX =  Math.max(-15, Math.min(15, -ny * 15));
+        const rotY =  Math.max(-20, Math.min(20,  nx * 20));
+        const rotX =  Math.max(-20, Math.min(20, -ny * 20));
 
         title.classList.remove('tilt-reset');
         title.classList.add('tilt-active');
