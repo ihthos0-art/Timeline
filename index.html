@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hilo</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,700;1,300;1,400;1,700&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    /* ─── Reset ───────────────────────────────────────────── */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    /* ─── Design Tokens ───────────────────────────────────── */
+    :root {
+      --bg-base:       #0d0a0e;
+      --gold:          #c9a84c;
+      --gold-light:    #e8c97a;
+      --cream:         #f5ede0;
+      --blush:         #e8c4b8;
+      --purple-dark:   #2e1f3a;
+      --purple-mid:    #4a2d5c;
+    }
+
+    /* ─── Base ────────────────────────────────────────────── */
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg-base);
+    }
+
+    body {
+      position: relative;
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    /* ─── Layer 1 — Animated Background ──────────────────── */
+    /*
+     * OWNER: Replace the canvas JS block below with your own
+     * animated shader / gradient. Keep this element in place.
+     */
+    #bg-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      display: block;
+    }
+
+    /* ─── Layer 2 — Film Grain ────────────────────────────── */
+    .grain-overlay {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      opacity: 0.06;
+      mix-blend-mode: overlay;
+      z-index: 5;
+    }
+
+    /* ─── Layer 3 — Scene (perspective root) ─────────────── */
+    #scene {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    /* ─── Hover Detection Zone ────────────────────────────── */
+    #hilo-wrap {
+      position: relative;
+      display: inline-block;
+      padding: 48px 72px;
+      perspective: 700px;
+      transform-style: preserve-3d;
+    }
+
+    /* ─── "Hilo" Title ────────────────────────────────────── */
+    #hilo-title {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(80px, 18vw, 220px);
+      font-weight: 700;
+      font-style: italic;
+      line-height: 1;
+      letter-spacing: -0.02em;
+
+      /* Cream-to-gold gradient text */
+      background: linear-gradient(
+        145deg,
+        var(--cream)      0%,
+        var(--gold-light) 40%,
+        var(--gold)       70%,
+        var(--cream)      100%
+      );
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+
+      /* Depth glow */
+      filter:
+        drop-shadow(0 0 60px rgba(201, 168, 76, 0.22))
+        drop-shadow(0 8px 32px rgba(0, 0, 0, 0.9));
+
+      transform-style: preserve-3d;
+      will-change: transform;
+
+      /* Entry animation — lands with weight */
+      animation: hiloFlyIn 1.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    @keyframes hiloFlyIn {
+      0% {
+        opacity: 0;
+        transform: translateY(-130vh) scale(0.65);
+        filter:
+          drop-shadow(0 0 0px rgba(201, 168, 76, 0))
+          drop-shadow(0 0 0px rgba(0, 0, 0, 0));
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter:
+          drop-shadow(0 0 60px rgba(201, 168, 76, 0.22))
+          drop-shadow(0 8px 32px rgba(0, 0, 0, 0.9));
+      }
+    }
+
+    /* Applied via JS after entry — fast follow during move */
+    #hilo-title.tilt-active {
+      transition: transform 0.07s linear;
+    }
+
+    /* Smooth snap back on mouse leave */
+    #hilo-title.tilt-reset {
+      transition: transform 0.65s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    /* ─── Layer 4 — Subtitle ──────────────────────────────── */
+    #subtitle {
+      position: fixed;
+      bottom: 8vh;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: clamp(12px, 1.5vw, 18px);
+      font-weight: 300;
+      font-style: italic;
+      letter-spacing: 0.1em;
+      white-space: nowrap;
+
+      color: rgba(245, 237, 224, 0.5);
+      opacity: 0;
+
+      /* Fades in after Hilo lands */
+      animation: subtitleFadeIn 1.5s ease 1.9s forwards;
+    }
+
+    @keyframes subtitleFadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    /* Breathing pulse — applied via JS after fade-in completes */
+    #subtitle.breathing {
+      animation: subtitleBreathe 3.2s ease-in-out infinite;
+    }
+
+    @keyframes subtitleBreathe {
+      0%, 100% { opacity: 0.38; }
+      50%       { opacity: 0.68; }
+    }
+
+    /* ─── Fade-to-Black Overlay ───────────────────────────── */
+    #fade-overlay {
+      position: fixed;
+      inset: 0;
+      background: #000000;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 999;
+      transition: opacity 0.82s ease;
+    }
+
+    #fade-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    /* ─── Reduced Motion Fallback ─────────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      #hilo-title {
+        animation: none !important;
+        opacity: 1;
+        transform: none;
+      }
+
+      #subtitle {
+        animation: none !important;
+        opacity: 0.5;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ① Background — owner replaces canvas JS with own implementation -->
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- ② Film Grain — SVG feTurbulence with animated seed -->
+  <svg class="grain-overlay" xmlns="http://www.w3.org/2000/svg"
+       aria-hidden="true" focusable="false">
+    <defs>
+      <filter id="grain-filter"
+              x="0%" y="0%" width="100%" height="100%"
+              color-interpolation-filters="sRGB">
+        <feTurbulence
+          id="grain-turbulence"
+          type="fractalNoise"
+          baseFrequency="0.68"
+          numOctaves="4"
+          seed="3"
+          stitchTiles="stitch"
+        />
+        <feColorMatrix type="saturate" values="0" />
+      </filter>
+    </defs>
+    <rect width="100%" height="100%" filter="url(#grain-filter)" />
+  </svg>
+
+  <!-- ③ Hilo — perspective wrapper + title -->
+  <div id="scene">
+    <div id="hilo-wrap" role="presentation">
+      <h1 id="hilo-title">Hilo</h1>
+    </div>
+  </div>
+
+  <!-- ④ Subtitle -->
+  <p id="subtitle">Click anywhere to continue</p>
+
+  <!-- ⑤ Full-screen fade overlay for page transition -->
+  <div id="fade-overlay" aria-hidden="true"></div>
+
+
+  <script>
+    /* ─────────────────────────────────────────────────────────
+     * PLACEHOLDER BACKGROUND
+     * Slow-moving radial gradients in the site color palette.
+     * ─── OWNER: Replace everything inside this IIFE with your
+     * own canvas shader. Keep #bg-canvas in the HTML. ───────
+     * ───────────────────────────────────────────────────────── */
+    (function initPlaceholderBg() {
+      const canvas = document.getElementById('bg-canvas');
+      const ctx    = canvas.getContext('2d');
+
+      function resize() {
+        canvas.width  = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      function draw() {
+        const w = canvas.width;
+        const h = canvas.height;
+        const t = Date.now() * 0.00038;
+
+        /* Base fill */
+        ctx.fillStyle = '#0d0a0e';
+        ctx.fillRect(0, 0, w, h);
+
+        /* Purple bloom — drifts upper-left */
+        const p1 = ctx.createRadialGradient(
+          w * (0.18 + 0.14 * Math.sin(t * 0.9)),
+          h * (0.22 + 0.12 * Math.cos(t * 0.7)),
+          0,
+          w * 0.18, h * 0.22, w * 0.72
+        );
+        p1.addColorStop(0,   'rgba(74,  45,  92, 0.55)');
+        p1.addColorStop(0.6, 'rgba(46,  31,  58, 0.20)');
+        p1.addColorStop(1,   'rgba(0,   0,   0,  0)');
+        ctx.fillStyle = p1;
+        ctx.fillRect(0, 0, w, h);
+
+        /* Gold warmth — drifts center-right */
+        const p2 = ctx.createRadialGradient(
+          w * (0.72 + 0.10 * Math.cos(t * 0.65)),
+          h * (0.52 + 0.14 * Math.sin(t * 0.85)),
+          0,
+          w * 0.72, h * 0.52, w * 0.58
+        );
+        p2.addColorStop(0,   'rgba(201, 168, 76, 0.09)');
+        p2.addColorStop(0.45,'rgba(201, 168, 76, 0.04)');
+        p2.addColorStop(1,   'rgba(0,   0,   0,  0)');
+        ctx.fillStyle = p2;
+        ctx.fillRect(0, 0, w, h);
+
+        /* Deep purple undertone — breathes at bottom */
+        const p3 = ctx.createRadialGradient(
+          w * (0.5  + 0.07 * Math.sin(t * 1.2)),
+          h * (0.88 + 0.05 * Math.cos(t * 0.8)),
+          0,
+          w * 0.5, h * 0.88, w * 0.65
+        );
+        p3.addColorStop(0,   'rgba(46, 31, 58, 0.60)');
+        p3.addColorStop(0.5, 'rgba(26, 16, 24, 0.30)');
+        p3.addColorStop(1,   'rgba(0,  0,  0,  0)');
+        ctx.fillStyle = p3;
+        ctx.fillRect(0, 0, w, h);
+
+        requestAnimationFrame(draw);
+      }
+
+      draw();
+    })();
+
+
+    /* ─────────────────────────────────────────────────────────
+     * FILM GRAIN — flicker seed every ~80ms for live texture
+     * ───────────────────────────────────────────────────────── */
+    (function initGrain() {
+      const turb = document.getElementById('grain-turbulence');
+      let seed = 3;
+      setInterval(function () {
+        seed = (seed % 199) + 1;
+        turb.setAttribute('seed', seed);
+      }, 80);
+    })();
+
+
+    /* ─────────────────────────────────────────────────────────
+     * HILO — 3D TILT ON HOVER
+     * ───────────────────────────────────────────────────────── */
+    (function initTilt() {
+      const title        = document.getElementById('hilo-title');
+      const wrap         = document.getElementById('hilo-wrap');
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      let tiltEnabled    = false;
+
+      function enableTilt() {
+        /* Lock the visual state before handing off to JS transforms */
+        title.style.animation = 'none';
+        title.style.opacity   = '1';
+        title.style.transform = 'rotateX(0deg) rotateY(0deg)';
+        tiltEnabled           = true;
+      }
+
+      if (reducedMotion) {
+        enableTilt();
+      } else {
+        title.addEventListener('animationend', function onEntry(e) {
+          if (e.animationName !== 'hiloFlyIn') return;
+          title.removeEventListener('animationend', onEntry);
+          enableTilt();
+        });
+      }
+
+      wrap.addEventListener('mousemove', function (e) {
+        if (!tiltEnabled) return;
+
+        const rect = wrap.getBoundingClientRect();
+        const cx   = rect.left + rect.width  / 2;
+        const cy   = rect.top  + rect.height / 2;
+
+        /* Normalized -1 → +1 within the hover zone */
+        const nx = (e.clientX - cx) / (rect.width  / 2);
+        const ny = (e.clientY - cy) / (rect.height / 2);
+
+        /* Clamp to avoid extreme angles at zone edges */
+        const rotY =  Math.max(-15, Math.min(15,  nx * 15));
+        const rotX =  Math.max(-15, Math.min(15, -ny * 15));
+
+        title.classList.remove('tilt-reset');
+        title.classList.add('tilt-active');
+        title.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+      });
+
+      wrap.addEventListener('mouseleave', function () {
+        if (!tiltEnabled) return;
+        title.classList.remove('tilt-active');
+        title.classList.add('tilt-reset');
+        title.style.transform = 'rotateX(0deg) rotateY(0deg)';
+      });
+    })();
+
+
+    /* ─────────────────────────────────────────────────────────
+     * SUBTITLE — begin breathing pulse after fade-in finishes
+     * ───────────────────────────────────────────────────────── */
+    (function initSubtitle() {
+      const subtitle      = document.getElementById('subtitle');
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      if (reducedMotion) {
+        subtitle.style.opacity = '0.5';
+        return;
+      }
+
+      /* delay (1.9s) + fade duration (1.5s) = 3.4s before breathing */
+      setTimeout(function () {
+        subtitle.classList.add('breathing');
+      }, 3400);
+    })();
+
+
+    /* ─────────────────────────────────────────────────────────
+     * CLICK ANYWHERE — fade to black then navigate
+     * ───────────────────────────────────────────────────────── */
+    (function initClickThrough() {
+      const overlay = document.getElementById('fade-overlay');
+      let   clicked = false;
+
+      document.addEventListener('click', function () {
+        if (clicked) return;
+        clicked = true;
+
+        overlay.classList.add('active');
+
+        setTimeout(function () {
+          window.location.href = 'page02.html';
+        }, 820);
+      });
+    })();
+  </script>
+
+</body>
+</html>
