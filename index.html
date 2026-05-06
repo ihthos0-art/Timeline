@@ -112,12 +112,12 @@
       -webkit-text-fill-color: transparent;
       background-clip: text;
 
-      /* Depth glow */
+      /* Depth glow — static, not animated (animating filter breaks mobile Safari gradient text) */
       filter:
         drop-shadow(0 0 60px rgba(201, 168, 76, 0.22))
         drop-shadow(0 8px 32px rgba(0, 0, 0, 0.9));
 
-      transform-style: preserve-3d;
+      /* preserve-3d removed — causes gradient text to vanish on iOS/WebKit */
       will-change: transform;
 
       /* Entry animation — spins in, lands with weight */
@@ -128,18 +128,12 @@
       0% {
         opacity: 0;
         transform: translateY(-130vh) rotateY(260deg) scale(0.45);
-        filter:
-          drop-shadow(0 0 0px rgba(201, 168, 76, 0))
-          drop-shadow(0 0 0px rgba(0, 0, 0, 0));
       }
       60% {
         opacity: 1;
       }
       80% {
         transform: translateY(14px) rotateY(-10deg) scale(1.03);
-        filter:
-          drop-shadow(0 0 80px rgba(201, 168, 76, 0.35))
-          drop-shadow(0 8px 32px rgba(0, 0, 0, 0.9));
       }
       92% {
         transform: translateY(-5px) rotateY(4deg) scale(0.98);
@@ -147,9 +141,6 @@
       100% {
         opacity: 1;
         transform: translateY(0) rotateY(0deg) scale(1);
-        filter:
-          drop-shadow(0 0 60px rgba(201, 168, 76, 0.22))
-          drop-shadow(0 8px 32px rgba(0, 0, 0, 0.9));
       }
     }
 
@@ -389,30 +380,48 @@
         setTimeout(enableTilt, 1600);
       }
 
-      wrap.addEventListener('mousemove', function (e) {
-        if (!tiltEnabled) return;
-
+      function applyTilt(clientX, clientY) {
         const rect = wrap.getBoundingClientRect();
         const cx   = rect.left + rect.width  / 2;
         const cy   = rect.top  + rect.height / 2;
 
-        const nx = (e.clientX - cx) / (rect.width  / 2);
-        const ny = (e.clientY - cy) / (rect.height / 2);
+        /* Use full viewport for touch so dragging anywhere tilts the title */
+        const nx = Math.max(-1, Math.min(1, (clientX - cx) / (rect.width  / 2)));
+        const ny = Math.max(-1, Math.min(1, (clientY - cy) / (rect.height / 2)));
 
-        const rotY =  Math.max(-20, Math.min(20,  nx * 20));
-        const rotX =  Math.max(-20, Math.min(20, -ny * 20));
+        const rotY =  nx * 20;
+        const rotX = -ny * 20;
 
         title.classList.remove('tilt-reset');
         title.classList.add('tilt-active');
         title.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
-      });
+      }
 
-      wrap.addEventListener('mouseleave', function () {
-        if (!tiltEnabled) return;
+      function resetTilt() {
         title.classList.remove('tilt-active');
         title.classList.add('tilt-reset');
         title.style.transform = 'rotateX(0deg) rotateY(0deg)';
+      }
+
+      /* Mouse */
+      wrap.addEventListener('mousemove', function (e) {
+        if (!tiltEnabled) return;
+        applyTilt(e.clientX, e.clientY);
       });
+      wrap.addEventListener('mouseleave', function () {
+        if (!tiltEnabled) return;
+        resetTilt();
+      });
+
+      /* Touch — drag finger over title to tilt */
+      document.addEventListener('touchmove', function (e) {
+        if (!tiltEnabled) return;
+        applyTilt(e.touches[0].clientX, e.touches[0].clientY);
+      }, { passive: true });
+      document.addEventListener('touchend', function () {
+        if (!tiltEnabled) return;
+        resetTilt();
+      }, { passive: true });
     })();
 
 
