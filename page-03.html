@@ -27,246 +27,150 @@
       user-select:none;
     }
 
-    /* ── Fixed background ─────────────────────── */
-    #bg-canvas{
-      position:fixed;inset:0;
-      width:100%;height:100%;
-      z-index:0;display:block;
-    }
+    #bg-canvas{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block}
+    #particle-canvas{position:fixed;inset:0;width:100%;height:100%;z-index:2;pointer-events:none}
 
-    /* ── Film grain ───────────────────────────── */
     .grain-overlay{
+      position:fixed;inset:0;width:100%;height:100%;
+      pointer-events:none;opacity:.05;mix-blend-mode:overlay;z-index:50;
+    }
+
+    .vignette{
       position:fixed;inset:0;
-      width:100%;height:100%;
-      pointer-events:none;
-      opacity:.06;mix-blend-mode:overlay;
-      z-index:50;
+      background:radial-gradient(ellipse at center,transparent 30%,rgba(0,0,0,0.6) 100%);
+      pointer-events:none;z-index:6;
     }
 
-    /* ── Main scene — scrolls with page ──────── */
     #rope-scene{
-      position:relative;
-      width:100%;
-      /* height set by JS */
-      will-change:transform;
+      position:relative;width:100%;
+      will-change:transform;z-index:10;
     }
 
-    /* ── Rope SVG ─────────────────────────────── */
     #rope-svg{
-      position:absolute;
-      top:0;left:0;
-      width:100%;
-      /* height set by JS */
-      pointer-events:none;
-      z-index:5;
+      position:absolute;top:0;left:0;width:100%;
+      pointer-events:none;z-index:5;
     }
-
     #rope-shadow-path{
-      fill:none;
-      stroke:var(--rope-shadow);
-      stroke-width:7;
-      stroke-linecap:round;
-      stroke-linejoin:round;
+      fill:none;stroke:var(--rope-shadow);stroke-width:7;
+      stroke-linecap:round;stroke-linejoin:round;
     }
     #rope-path{
-      fill:none;
-      stroke:var(--rope-col);
-      stroke-width:4;
-      stroke-linecap:round;
-      stroke-linejoin:round;
+      fill:none;stroke:var(--rope-col);stroke-width:4;
+      stroke-linecap:round;stroke-linejoin:round;
     }
-
     .pin-dot{
-      fill:var(--gold);
-      opacity:0;
-      transition:opacity .4s ease;
-      filter:drop-shadow(0 1px 3px rgba(0,0,0,.6));
+      fill:var(--gold);opacity:0;
+      transition:opacity .5s ease;
+      filter:drop-shadow(0 0 6px rgba(201,168,76,0.6));
     }
     .pin-dot.visible{opacity:1}
 
-    /* ── Polaroid ─────────────────────────────── */
+    /* ── Polaroid ── */
     .polaroid{
       position:absolute;
       transform-origin:top center;
-      opacity:0;
-      cursor:default;
-      z-index:10;
+      opacity:0;cursor:default;z-index:10;
     }
-
     .polaroid.entering{
-      animation:pinEntry .7s cubic-bezier(0.34,1.56,0.64,1) forwards;
+      animation:pinEntry .9s cubic-bezier(0.34,1.56,0.64,1) forwards;
     }
     .polaroid.entered{
       opacity:1;
-      animation:sway var(--sw-dur,5s) ease-in-out var(--sw-delay,0s) infinite;
+    }
+    .polaroid.entered .polaroid-frame{
+      animation:gentleSway var(--sw-dur,5s) ease-in-out var(--sw-delay,0s) infinite;
     }
 
     @keyframes pinEntry{
-      from{
-        opacity:0;
-        transform:scale(.58) translateY(-38px) rotate(calc(var(--rot) + 14deg));
-      }
-      to{
-        opacity:1;
-        transform:scale(1) translateY(0) rotate(var(--rot));
-      }
+      from{opacity:0;transform:scale(.5) translateY(-50px) rotate(calc(var(--rot) + 20deg));}
+      to{opacity:1;transform:scale(1) translateY(0) rotate(var(--rot));}
+    }
+    @keyframes gentleSway{
+      0%,100%{transform:rotate(calc(var(--rot) - 1.5deg))}
+      50%{transform:rotate(calc(var(--rot) + 1.5deg))}
     }
 
-    @keyframes sway{
-      0%,100%{transform:rotate(calc(var(--rot) - 2.2deg))}
-      50%    {transform:rotate(calc(var(--rot) + 2.2deg))}
-    }
-
-    /* wider sway while scrolling — class toggled by JS */
-    body.is-scrolling .polaroid.entered{
-      animation-name:sway-scroll;
-    }
-    @keyframes sway-scroll{
-      0%,100%{transform:rotate(calc(var(--rot) - 5deg))}
-      50%    {transform:rotate(calc(var(--rot) + 5deg))}
-    }
-
-    /* ── Pin head + thread ────────────────────── */
     .pin-head{
-      position:absolute;
-      top:-6px;left:50%;
-      transform:translateX(-50%);
-      width:13px;height:13px;
-      border-radius:50%;
-      background:radial-gradient(circle at 35% 35%, #e8c97a, #9a6f20);
-      box-shadow:0 2px 6px rgba(0,0,0,.5);
+      position:absolute;top:-6px;left:50%;transform:translateX(-50%);
+      width:14px;height:14px;border-radius:50%;
+      background:radial-gradient(circle at 35% 35%,#e8c97a,#9a6f20);
+      box-shadow:0 2px 8px rgba(0,0,0,.5),0 0 12px rgba(201,168,76,0.3);
       z-index:2;
     }
     .hang-thread{
-      position:absolute;
-      top:7px;left:50%;
-      transform:translateX(-50%);
-      width:1px;height:22px;
-      background:rgba(196,163,90,.55);
+      position:absolute;top:8px;left:50%;transform:translateX(-50%);
+      width:1.5px;height:20px;
+      background:linear-gradient(to bottom,rgba(196,163,90,0.7),rgba(196,163,90,0.3));
       z-index:1;
     }
 
-    /* ── Polaroid frame ───────────────────────── */
     .polaroid-frame{
       position:relative;
       background:#f5f0e8;
-      padding:11px 11px 34px;
-      border-radius:2px;
-      box-shadow:0 8px 28px rgba(0,0,0,.55),0 2px 8px rgba(0,0,0,.3);
-      margin-top:28px; /* space for pin + thread */
-      width:clamp(150px,17vw,195px);
+      padding:12px 12px 36px;
+      border-radius:3px;
+      box-shadow:
+        0 10px 40px rgba(0,0,0,.55),
+        0 2px 8px rgba(0,0,0,.3),
+        0 0 0 1px rgba(201,168,76,0.08);
+      margin-top:28px;
+      width:clamp(140px,16vw,190px);
     }
-
     .polaroid-media{
-      display:block;
-      width:100%;
-      aspect-ratio:4/3;
-      object-fit:cover;
-      border-radius:1px;
-      background:rgba(46,31,58,.45); /* fallback if image missing */
+      display:block;width:100%;aspect-ratio:4/3;
+      object-fit:cover;border-radius:1px;
+      background:rgba(46,31,58,.45);
     }
-    video.polaroid-media{
-      cursor:pointer;
-    }
+    video.polaroid-media{cursor:pointer}
 
     .polaroid-caption{
-      height:22px;
-      display:flex;align-items:center;justify-content:center;
+      height:22px;display:flex;align-items:center;justify-content:center;
       font-size:10px;font-style:italic;font-weight:300;
-      color:rgba(60,40,20,.5);
-      letter-spacing:.06em;
+      color:rgba(60,40,20,.5);letter-spacing:.06em;
     }
 
-    /* ── Knot ─────────────────────────────────── */
+    /* ── Knot ── */
     #knot-wrap{
-      position:absolute;
-      left:50%;
-      transform:translateX(-50%);
-      display:flex;flex-direction:column;
-      align-items:center;
-      gap:14px;
-      opacity:0;
-      z-index:15;
+      position:absolute;left:50%;transform:translateX(-50%);
+      display:flex;flex-direction:column;align-items:center;gap:14px;
+      opacity:0;z-index:15;
     }
-    #knot-wrap.visible{
-      animation:knotAppear .6s ease forwards;
-    }
-    @keyframes knotAppear{
-      from{opacity:0;transform:translateX(-50%) scale(.7)}
-      to  {opacity:1;transform:translateX(-50%) scale(1)}
-    }
-    #knot-wrap.settled{
-      animation:knotBreathe 4s ease-in-out infinite;
-    }
-    @keyframes knotBreathe{
-      0%,100%{transform:translateX(-50%) scale(1)}
-      50%    {transform:translateX(-50%) scale(1.025)}
-    }
+    #knot-wrap.visible{animation:knotAppear .6s ease forwards}
+    @keyframes knotAppear{from{opacity:0;transform:translateX(-50%) scale(.7)}to{opacity:1;transform:translateX(-50%) scale(1)}}
+    #knot-wrap.settled{animation:knotBreathe 4s ease-in-out infinite}
+    @keyframes knotBreathe{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.025)}}
 
     #knot-svg{overflow:visible}
-    .knot-strand{
-      fill:none;stroke-linecap:round;stroke-linejoin:round;
-    }
+    .knot-strand{fill:none;stroke-linecap:round;stroke-linejoin:round}
 
     #knot-label{
-      font-size:clamp(13px,1.4vw,16px);
-      font-style:italic;font-weight:300;
-      letter-spacing:.12em;
-      color:rgba(245,237,224,.55);
-      opacity:0;
+      font-size:clamp(13px,1.4vw,16px);font-style:italic;font-weight:300;
+      letter-spacing:.12em;color:rgba(245,237,224,.55);opacity:0;
       transition:opacity 1s ease;
     }
     #knot-label.visible{opacity:1}
 
-    /* ── Audio fallback ───────────────────────── */
     #audio-btn{
-      display:none;
-      position:fixed;bottom:3vh;right:3vw;
-      z-index:40;
-      background:rgba(20,12,28,.7);
-      border:1px solid rgba(201,168,76,.35);
-      border-radius:20px;
-      padding:7px 16px;
-      color:rgba(245,237,224,.7);
-      font-family:inherit;font-size:13px;font-style:italic;
-      cursor:pointer;
-      backdrop-filter:blur(8px);
-      transition:opacity .3s ease;
+      display:none;position:fixed;bottom:3vh;right:3vw;z-index:40;
+      background:rgba(20,12,28,.7);border:1px solid rgba(201,168,76,.35);
+      border-radius:20px;padding:7px 16px;color:rgba(245,237,224,.7);
+      font-family:inherit;font-size:13px;font-style:italic;cursor:pointer;
+      backdrop-filter:blur(8px);transition:opacity .3s ease;
     }
 
-    /* ── Prompt ───────────────────────────────── */
     #prompt{
-      position:fixed;
-      bottom:6vh;left:50%;
-      transform:translateX(-50%);
-      z-index:30;
-      font-size:clamp(11px,1.2vw,15px);
-      font-style:italic;font-weight:300;
-      letter-spacing:.13em;
-      white-space:nowrap;
-      color:rgba(245,237,224,.45);
-      opacity:0;pointer-events:none;
-      transition:opacity .9s ease;
+      position:fixed;bottom:6vh;left:50%;transform:translateX(-50%);z-index:30;
+      font-size:clamp(11px,1.2vw,15px);font-style:italic;font-weight:300;
+      letter-spacing:.13em;white-space:nowrap;color:rgba(245,237,224,.45);
+      opacity:0;pointer-events:none;transition:opacity .9s ease;
     }
-    #prompt.visible{
-      opacity:1;
-      animation:promptBreathe 3s ease-in-out infinite;
-    }
-    @keyframes promptBreathe{
-      0%,100%{opacity:.28}50%{opacity:.62}
-    }
+    #prompt.visible{opacity:1;animation:promptBreathe 3s ease-in-out infinite}
+    @keyframes promptBreathe{0%,100%{opacity:.28}50%{opacity:.62}}
 
-    /* ── Fade overlay ─────────────────────────── */
-    #fade-overlay{
-      position:fixed;inset:0;
-      background:#000;
-      opacity:1;
-      z-index:100;
-      transition:opacity .8s ease;
-    }
+    #fade-overlay{position:fixed;inset:0;background:#000;opacity:1;z-index:100;transition:opacity .8s ease}
 
     @media(prefers-reduced-motion:reduce){
-      .polaroid.entering,.polaroid.entered{animation:none!important;opacity:1}
+      .polaroid.entering,.polaroid.entered .polaroid-frame{animation:none!important;opacity:1}
       #knot-wrap.visible,#knot-wrap.settled{animation:none!important;opacity:1;transform:translateX(-50%)}
     }
   </style>
@@ -274,6 +178,7 @@
 <body>
 
 <canvas id="bg-canvas"></canvas>
+<canvas id="particle-canvas"></canvas>
 
 <svg class="grain-overlay" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
   <defs>
@@ -285,6 +190,8 @@
   <rect width="100%" height="100%" filter="url(#gf)"/>
 </svg>
 
+<div class="vignette"></div>
+
 <div id="rope-scene">
   <svg id="rope-svg" xmlns="http://www.w3.org/2000/svg">
     <path id="rope-shadow-path"/>
@@ -293,9 +200,7 @@
   </svg>
   <!-- polaroids injected by JS -->
   <div id="knot-wrap">
-    <svg id="knot-svg" width="100" height="100" viewBox="-50 -50 100 100">
-      <!-- strands drawn by JS -->
-    </svg>
+    <svg id="knot-svg" width="100" height="100" viewBox="-50 -50 100 100"></svg>
     <p id="knot-label">still going</p>
   </div>
 </div>
@@ -309,35 +214,29 @@
 <div id="fade-overlay"></div>
 
 <script>
-/* ═══════════════════════════════════════════════════════
-   EDIT THIS SECTION — swap in your real asset filenames
-   ══════════════════════════════════════════════════════ */
-const MEDIA_ITEMS = (function(){
-  const items = [];
+/* ═══════════════════════════════════════════
+   MEDIA ITEMS — edit filenames here
+   ═══════════════════════════════════════════ */
+const MEDIA_ITEMS=(function(){
+  const items=[];
   for(let i=1;i<=119;i++){
-    items.push({type:'photo', src:`./assets/photo-${String(i).padStart(3,'0')}.jpg`});
+    items.push({type:'photo',src:`./assets/photo-${String(i).padStart(3,'0')}.jpg`});
   }
-  // 8 videos sprinkled throughout
   const vSlots=[14,26,39,53,66,79,93,108];
   vSlots.forEach((slot,vi)=>{
     items.splice(slot+vi,0,{type:'video',src:`./assets/video-0${vi+1}.mp4`});
   });
-  return items; // 127 total
+  return items;
 })();
-/* ══════════════════════════════════════════════════════ */
 
-/* ── Utilities ───────────────────────────────────────── */
+/* ── Utilities ── */
 const lerp=(a,b,t)=>a+(b-a)*t;
 const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,v));
-function seeded(n){
-  const x=Math.sin(n*127.1+311.7)*43758.5453;
-  return x-Math.floor(x);
-}
+function seeded(n){const x=Math.sin(n*127.1+311.7)*43758.5453;return x-Math.floor(x);}
 
-/* ── Placeholder background ─────────────────────────── */
+/* ── Background ── */
 (function(){
-  const cv=document.getElementById('bg-canvas');
-  const cx=cv.getContext('2d');
+  const cv=document.getElementById('bg-canvas'),cx=cv.getContext('2d');
   function resize(){cv.width=innerWidth;cv.height=innerHeight}
   resize();window.addEventListener('resize',resize);
   function draw(){
@@ -357,113 +256,130 @@ function seeded(n){
   draw();
 })();
 
-/* ── Grain flicker ───────────────────────────────────── */
+/* ── Particles ── */
 (function(){
-  const t=document.getElementById('gt');let s=9;
+  const cv=document.getElementById('particle-canvas'),cx=cv.getContext('2d');
+  const particles=[];const COUNT=25;
+  function resize(){cv.width=innerWidth;cv.height=innerHeight}
+  resize();window.addEventListener('resize',resize);
+  for(let i=0;i<COUNT;i++){
+    particles.push({
+      x:Math.random()*innerWidth,y:Math.random()*innerHeight*3,
+      r:Math.random()*1.4+0.3,
+      dx:(Math.random()-0.5)*0.08,dy:Math.random()*0.15+0.02,
+      alpha:Math.random()*0.25+0.04,
+      pulse:Math.random()*Math.PI*2,pulseSpeed:Math.random()*0.005+0.002
+    });
+  }
+  function draw(){
+    cx.clearRect(0,0,cv.width,cv.height);
+    for(const p of particles){
+      p.x+=p.dx;p.y+=p.dy;p.pulse+=p.pulseSpeed;
+      if(p.y>innerHeight*1.1){p.y=-10;p.x=Math.random()*innerWidth;}
+      if(p.x<-10)p.x=cv.width+10;if(p.x>cv.width+10)p.x=-10;
+      const a=p.alpha*(0.6+0.4*Math.sin(p.pulse));
+      cx.beginPath();cx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      cx.fillStyle=`rgba(201,168,76,${a.toFixed(3)})`;cx.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ── Grain ── */
+(function(){const t=document.getElementById('gt');let s=9;
   setInterval(()=>{s=(s%199)+1;t.setAttribute('seed',s);},80);
 })();
 
-/* ══════════════════════════════════════════════════════
-   MAIN BUILD
-   ══════════════════════════════════════════════════════ */
-let totalLen=0, ropePathEl, ropeShadowEl, pinGroup;
+/* ═══════════════════════════════════════════
+   ROPE TIMELINE — rebuilt
+   ═══════════════════════════════════════════ */
+let totalLen=0,ropePathEl,ropeShadowEl,pinGroup;
 let knotAnimDone=false;
-let audioEl, audioDucked=false;
+let audioEl,audioDucked=false;
 
-window.addEventListener('DOMContentLoaded', buildScene);
-window.addEventListener('resize', debounce(()=>location.reload(),400));
+window.addEventListener('DOMContentLoaded',buildScene);
+window.addEventListener('resize',debounce(()=>location.reload(),400));
 
 function debounce(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms);};}
 
 function buildScene(){
-  const W   = window.innerWidth;
-  const VH  = window.innerHeight;
-  const cx  = W/2;
-  const N   = MEDIA_ITEMS.length;
-  const SPACING  = 370;
-  const AMP      = clamp(W*.34, 90, 148); // ±px from center
-  const ROPE_TOP = 70;                     // rope enters near top of page
+  const W=window.innerWidth;
+  const VH=window.innerHeight;
+  const cx=W/2;
+  const N=MEDIA_ITEMS.length;
+  const SPACING=370;
+  const AMP=clamp(W*.34,90,148);
+  const ROPE_TOP=70;
 
-  /* ── Page & SVG dimensions ───────────────── */
-  const PAGE_H = ROPE_TOP + N*SPACING + 700 + VH;
-  document.body.style.minHeight = PAGE_H+'px';
-  const scene = document.getElementById('rope-scene');
-  scene.style.minHeight = PAGE_H+'px';
-  const ropeSvg = document.getElementById('rope-svg');
-  ropeSvg.setAttribute('height', PAGE_H);
-  ropeSvg.setAttribute('viewBox', `0 0 ${W} ${PAGE_H}`);
-  ropeSvg.setAttribute('width', W);
+  /* ── Page dimensions ── */
+  const PAGE_H=ROPE_TOP+N*SPACING+700+VH;
+  document.body.style.minHeight=PAGE_H+'px';
+  const scene=document.getElementById('rope-scene');
+  scene.style.minHeight=PAGE_H+'px';
+  const ropeSvg=document.getElementById('rope-svg');
+  ropeSvg.setAttribute('height',PAGE_H);
+  ropeSvg.setAttribute('viewBox',`0 0 ${W} ${PAGE_H}`);
+  ropeSvg.setAttribute('width',W);
 
-  /* ── Attachment points ───────────────────── */
+  /* ── Attachment points ── */
   const pts=[];
   for(let i=0;i<N;i++){
-    const side = i%2===0 ? 1 : -1;
-    const xVar = (seeded(i*3)-.5)*24;
-    const yVar = (seeded(i*3+1)-.5)*18;
-    const rot  = side*(3 + seeded(i*3+2)*5.5);
-    pts.push({
-      x: cx + side*(AMP+xVar),
-      y: ROPE_TOP + (i+1)*SPACING + yVar,
-      rot, side
-    });
+    const side=i%2===0?1:-1;
+    const xVar=(seeded(i*3)-.5)*24;
+    const yVar=(seeded(i*3+1)-.5)*18;
+    const rot=side*(3+seeded(i*3+2)*5.5);
+    pts.push({x:cx+side*(AMP+xVar),y:ROPE_TOP+(i+1)*SPACING+yVar,rot,side});
   }
-  const knotY = pts[N-1].y + 290;
+  const knotY=pts[N-1].y+290;
 
-  /* ── Rope SVG path ───────────────────────── */
-  ropePathEl   = document.getElementById('rope-path');
-  ropeShadowEl = document.getElementById('rope-shadow-path');
-  pinGroup     = document.getElementById('pin-dots');
+  /* ── Rope SVG path ── */
+  ropePathEl=document.getElementById('rope-path');
+  ropeShadowEl=document.getElementById('rope-shadow-path');
+  pinGroup=document.getElementById('pin-dots');
 
-  const pathD = buildRopePath(cx, ROPE_TOP, pts, knotY);
-  ropePathEl.setAttribute('d', pathD);
-  ropeShadowEl.setAttribute('d', pathD);
-
-  // Offset shadow slightly for depth
+  const pathD=buildRopePath(cx,ROPE_TOP,pts,knotY);
+  ropePathEl.setAttribute('d',pathD);
+  ropeShadowEl.setAttribute('d',pathD);
   ropeShadowEl.setAttribute('transform','translate(2,3)');
 
-  totalLen = ropePathEl.getTotalLength();
-  ropePathEl.style.strokeDasharray   = totalLen;
-  ropePathEl.style.strokeDashoffset  = totalLen;
-  ropeShadowEl.style.strokeDasharray  = totalLen;
-  ropeShadowEl.style.strokeDashoffset = totalLen;
+  totalLen=ropePathEl.getTotalLength();
+  ropePathEl.style.strokeDasharray=totalLen;
+  ropePathEl.style.strokeDashoffset=totalLen;
+  ropeShadowEl.style.strokeDasharray=totalLen;
+  ropeShadowEl.style.strokeDashoffset=totalLen;
 
-  /* ── SVG pin dots ────────────────────────── */
+  /* ── Pin dots ── */
   pts.forEach((pt,i)=>{
-    const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
-    c.setAttribute('cx', pt.x);
-    c.setAttribute('cy', pt.y);
-    c.setAttribute('r', '4');
-    c.classList.add('pin-dot');
-    c.dataset.idx = i;
+    const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c.setAttribute('cx',pt.x);c.setAttribute('cy',pt.y);c.setAttribute('r','5');
+    c.classList.add('pin-dot');c.dataset.idx=i;
     pinGroup.appendChild(c);
   });
 
-  /* ── Polaroid elements ───────────────────── */
-  const frag = document.createDocumentFragment();
+  /* ── Polaroids ── */
+  const frag=document.createDocumentFragment();
   pts.forEach((pt,i)=>{
-    const item = MEDIA_ITEMS[i];
-    const pw   = clamp(W*.17, 150, 195);
+    const item=MEDIA_ITEMS[i];
+    const pw=clamp(W*.16,140,190);
 
-    const wrap = document.createElement('div');
-    wrap.className = 'polaroid';
-    wrap.dataset.idx = i;
-    wrap.style.cssText = [
-      `left:${pt.x - pw/2 + pt.side*12}px`,
-      `top:${pt.y - 38}px`,         // 38px = pin(13)+thread(22)+gap(3)
+    const wrap=document.createElement('div');
+    wrap.className='polaroid';wrap.dataset.idx=i;
+    wrap.style.cssText=[
+      `left:${pt.x-pw/2+pt.side*12}px`,
+      `top:${pt.y-38}px`,
       `--rot:${pt.rot}deg`,
       `--sw-dur:${4+seeded(i*7)*3.2|0}s`,
       `--sw-delay:-${(seeded(i*11)*4).toFixed(1)}s`,
     ].join(';');
 
-    wrap.innerHTML = `
+    wrap.innerHTML=`
       <div class="pin-head"></div>
       <div class="hang-thread"></div>
       <div class="polaroid-frame" style="width:${pw}px">
         ${item.type==='video'
-          ? `<video class="polaroid-media" src="${item.src}"
-               muted playsinline preload="none" loop></video>`
-          : `<img  class="polaroid-media" src="${item.src}"
-               loading="lazy" alt=""/>`
+          ?`<video class="polaroid-media" src="${item.src}" muted playsinline preload="none" loop></video>`
+          :`<img class="polaroid-media" src="${item.src}" loading="lazy" alt=""/>`
         }
         <div class="polaroid-caption"></div>
       </div>`;
@@ -472,141 +388,101 @@ function buildScene(){
   });
   scene.appendChild(frag);
 
-  /* ── Knot position ───────────────────────── */
-  const knotWrap = document.getElementById('knot-wrap');
-  knotWrap.style.top = knotY + 'px';
+  /* ── Knot position ── */
+  const knotWrap=document.getElementById('knot-wrap');
+  knotWrap.style.top=knotY+'px';
   buildKnot();
 
-  /* ── Scroll animation loop ───────────────── */
-  const MAX_SCROLL = PAGE_H - VH;
-  let curOffset   = totalLen;
-  let swayTarget  = 0;
-  let swayCur     = 0;
-  let scrollDelta = 0;
-  let lastSY      = window.scrollY;
-
-  window.addEventListener('scroll',()=>{
-    scrollDelta = window.scrollY - lastSY;
-    lastSY = window.scrollY;
-    if(!scrollTimeout){
-      document.body.classList.add('is-scrolling');
-    }
-    clearTimeout(scrollTimeout);
-    scrollTimeout = setTimeout(()=>{
-      document.body.classList.remove('is-scrolling');
-    },300);
-  },{passive:true});
-  let scrollTimeout;
+  /* ── Scroll animation ── */
+  const MAX_SCROLL=PAGE_H-VH;
+  let curOffset=totalLen;
+  let lastSY=window.scrollY;
 
   function tick(){
-    const sy = window.scrollY;
-    // Rope leads slightly ahead of scroll so it arrives before photos pin
-    const progress = clamp((sy + VH*0.82)/MAX_SCROLL, 0, 1);
-    const targetOffset = totalLen*(1-progress);
-    curOffset = lerp(curOffset, targetOffset, 0.14);
+    const sy=window.scrollY;
+    const progress=clamp((sy+VH*0.82)/MAX_SCROLL,0,1);
+    const targetOffset=totalLen*(1-progress);
+    curOffset=lerp(curOffset,targetOffset,0.12);
 
-    ropePathEl.style.strokeDashoffset   = curOffset;
-    ropeShadowEl.style.strokeDashoffset = curOffset;
+    ropePathEl.style.strokeDashoffset=curOffset;
+    ropeShadowEl.style.strokeDashoffset=curOffset;
 
-    // Sway
-    swayTarget = clamp(scrollDelta*.11, -1.8, 1.8);
-    swayCur    = lerp(swayCur, swayTarget, .055);
-    scrollDelta = lerp(scrollDelta, 0, .25);
-    scene.style.transform = `skewX(${swayCur.toFixed(3)}deg)`;
-
-    // Reveal knot when rope is fully drawn
-    if(progress>0.98 && !knotAnimDone) triggerKnot();
+    if(progress>0.98&&!knotAnimDone)triggerKnot();
 
     requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);
 
-  /* ── IntersectionObserver — polaroids ─────── */
-  const pinObserver = new IntersectionObserver((entries)=>{
+  /* ── IntersectionObserver — polaroids ── */
+  const pinObserver=new IntersectionObserver((entries)=>{
     entries.forEach(entry=>{
-      if(!entry.isIntersecting) return;
-      const el  = entry.target;
-      const idx = +el.dataset.idx;
+      if(!entry.isIntersecting)return;
+      const el=entry.target;
+      const idx=+el.dataset.idx;
 
-      // Show pin dot
-      const dot = pinGroup.querySelector(`[data-idx="${idx}"]`);
-      if(dot) dot.classList.add('visible');
+      const dot=pinGroup.querySelector(`[data-idx="${idx}"]`);
+      if(dot)dot.classList.add('visible');
 
-      // Entry animation, then sway
       el.classList.add('entering');
-      el.addEventListener('animationend', e=>{
-        if(e.animationName!=='pinEntry') return;
+      el.addEventListener('animationend',e=>{
+        if(e.animationName!=='pinEntry')return;
         el.classList.remove('entering');
         el.classList.add('entered');
       },{once:true});
-      // Fallback
       setTimeout(()=>{
         if(!el.classList.contains('entered')){
-          el.classList.remove('entering');
-          el.classList.add('entered');
+          el.classList.remove('entering');el.classList.add('entered');
         }
-      },800);
+      },1000);
 
       pinObserver.unobserve(el);
     });
-  },{rootMargin:'0px 0px 180px 0px', threshold:0.05});
+  },{rootMargin:'0px 0px 150px 0px',threshold:0.05});
 
   document.querySelectorAll('.polaroid').forEach(p=>pinObserver.observe(p));
 
-  /* ── IntersectionObserver — videos ──────── */
-  const videoObserver = new IntersectionObserver((entries)=>{
+  /* ── Videos ── */
+  const videoObserver=new IntersectionObserver((entries)=>{
     entries.forEach(entry=>{
-      const vid = entry.target;
+      const vid=entry.target;
       if(entry.isIntersecting){
-        vid.muted = false;
-        vid.play().catch(()=>{ vid.muted=true; vid.play().catch(()=>{}); });
+        vid.muted=false;
+        vid.play().catch(()=>{vid.muted=true;vid.play().catch(()=>{});});
         duckAudio(true);
-      } else {
-        vid.muted = true;
-        vid.pause();
-        duckAudio(false);
+      }else{
+        vid.muted=true;vid.pause();duckAudio(false);
       }
     });
   },{threshold:0.55});
 
   document.querySelectorAll('video.polaroid-media').forEach(v=>videoObserver.observe(v));
 
-  /* ── Audio ───────────────────────────────── */
   initAudio();
 
-  /* ── Page fade-in ────────────────────────── */
-  const fadeEl = document.getElementById('fade-overlay');
-  requestAnimationFrame(()=>{
-    setTimeout(()=>{
-      fadeEl.style.opacity='0';
-      fadeEl.addEventListener('transitionend',()=>{
-        fadeEl.style.pointerEvents='none';
-      },{once:true});
-    },50);
-  });
+  /* ── Page fade-in ── */
+  const fadeEl=document.getElementById('fade-overlay');
+  requestAnimationFrame(()=>{setTimeout(()=>{
+    fadeEl.style.opacity='0';
+    fadeEl.addEventListener('transitionend',()=>{fadeEl.style.pointerEvents='none';},{once:true});
+  },50);});
 
-  /* ── Navigation ──────────────────────────── */
+  /* ── Navigation ── */
   document.addEventListener('click',()=>{
-    if(!knotAnimDone) return;
-    fadeEl.style.pointerEvents='auto';
-    fadeEl.style.opacity='1';
-    fadeAudio(0, 800);
-    setTimeout(()=>{ window.location.href='page-04.html'; },820);
+    if(!knotAnimDone)return;
+    fadeEl.style.pointerEvents='auto';fadeEl.style.opacity='1';
+    fadeAudio(0,800);
+    setTimeout(()=>{window.location.href='page-04.html';},820);
   });
 }
 
-/* ── Rope path builder ───────────────────────────────── */
-function buildRopePath(cx, ropeTop, pts, knotY){
-  // Enter from top-center
-  let d = `M ${cx} ${ropeTop}`;
-  // Curve to first attachment
-  d += ` C ${cx} ${ropeTop+80} ${pts[0].x} ${pts[0].y-60} ${pts[0].x} ${pts[0].y}`;
+function buildRopePath(cx,ropeTop,pts,knotY){
+  let d=`M ${cx} ${ropeTop}`;
+  d+=` C ${cx} ${ropeTop+80} ${pts[0].x} ${pts[0].y-60} ${pts[0].x} ${pts[0].y}`;
   for(let i=0;i<pts.length-1;i++){
-    const a=pts[i], b=pts[i+1];
-    const sp = b.y-a.y;
-    // Control points curve through center between left/right attachment points
-    const cp1x=(a.x+cx)/2, cp1y=a.y+sp*.42;
-    const cp2x=(b.x+cx)/2, cp2y=b.y-sp*.32;
+    const a=pts[i],b=pts[i+1];
+    const sp=b.y-a.y;
+    const cp1x=(a.x+cx)/2,cp1y=a.y+sp*.42;
+    const cp2x=(b.x+cx)/2,cp2y=b.y-sp*.32;
     d+=` C ${cp1x},${cp1y} ${cp2x},${cp2y} ${b.x},${b.y}`;
   }
   const last=pts[pts.length-1];
@@ -614,134 +490,91 @@ function buildRopePath(cx, ropeTop, pts, knotY){
   return d;
 }
 
-/* ── Knot SVG builder ────────────────────────────────── */
 function buildKnot(){
-  const svg = document.getElementById('knot-svg');
-
-  // Two strands that cross — strand 1 (under), strand 2 (over)
-  const strand1 = document.createElementNS('http://www.w3.org/2000/svg','path');
+  const svg=document.getElementById('knot-svg');
+  const strand1=document.createElementNS('http://www.w3.org/2000/svg','path');
   strand1.setAttribute('d',
     'M -5 -40 C -30 -40 -42 -18 -38 0 C -34 18 -18 28 0 28 C 18 28 34 18 38 0 C 42 -18 30 -40 5 -40 C 22 -40 32 -20 22 0 C 12 20 -12 20 -22 0 C -32 -20 -22 -40 -5 -40'
   );
   strand1.setAttribute('class','knot-strand');
-  strand1.setAttribute('stroke','#a0813a');
-  strand1.setAttribute('stroke-width','5.5');
+  strand1.setAttribute('stroke','#a0813a');strand1.setAttribute('stroke-width','5.5');
 
-  const strand2 = document.createElementNS('http://www.w3.org/2000/svg','path');
+  const strand2=document.createElementNS('http://www.w3.org/2000/svg','path');
   strand2.setAttribute('d',
     'M -28 -12 C -28 8 -14 28 0 28 C 14 28 28 8 28 -12 C 28 -32 14 -44 0 -40 C -14 -36 -28 -32 -28 -12'
   );
   strand2.setAttribute('class','knot-strand');
-  strand2.setAttribute('stroke','#c4a35a');
-  strand2.setAttribute('stroke-width','5.5');
+  strand2.setAttribute('stroke','#c4a35a');strand2.setAttribute('stroke-width','5.5');
 
-  svg.appendChild(strand1);
-  svg.appendChild(strand2);
+  svg.appendChild(strand1);svg.appendChild(strand2);
 
-  // Set up stroke-dashoffset for draw animation
   [strand1,strand2].forEach(s=>{
     const len=s.getTotalLength();
-    s.style.strokeDasharray=len;
-    s.style.strokeDashoffset=len;
+    s.style.strokeDasharray=len;s.style.strokeDashoffset=len;
   });
 }
 
-/* ── Knot trigger ────────────────────────────────────── */
 function triggerKnot(){
   knotAnimDone=true;
-  const knotWrap  = document.getElementById('knot-wrap');
-  const knotLabel = document.getElementById('knot-label');
-  const strands   = document.querySelectorAll('.knot-strand');
-  const prompt    = document.getElementById('prompt');
+  const knotWrap=document.getElementById('knot-wrap');
+  const knotLabel=document.getElementById('knot-label');
+  const strands=document.querySelectorAll('.knot-strand');
+  const prompt=document.getElementById('prompt');
 
-  fadeAudio(0,2000); // fade out theme at the knot moment
+  fadeAudio(0,2000);
 
   knotWrap.classList.add('visible');
 
-  // Draw strand 1 then strand 2
   strands.forEach((s,i)=>{
-    const len=parseFloat(s.style.strokeDasharray);
     const delay=i*550;
     setTimeout(()=>{
-      s.style.transition=`stroke-dashoffset .9s cubic-bezier(0.16,1,0.3,1)`;
+      s.style.transition='stroke-dashoffset .9s cubic-bezier(0.16,1,0.3,1)';
       s.style.strokeDashoffset='0';
     },delay+200);
   });
 
-  // Pulse then breathe
-  setTimeout(()=>{
-    knotWrap.classList.remove('visible');
-    knotWrap.classList.add('settled');
-  },1800);
-
-  // Label
-  setTimeout(()=>{ knotLabel.classList.add('visible'); },2200);
-
-  // Prompt
-  setTimeout(()=>{
-    prompt.textContent='click anywhere to continue';
-    prompt.classList.add('visible');
-  },3400);
+  setTimeout(()=>{knotWrap.classList.remove('visible');knotWrap.classList.add('settled');},1800);
+  setTimeout(()=>{knotLabel.classList.add('visible');},2200);
+  setTimeout(()=>{prompt.textContent='click anywhere to continue';prompt.classList.add('visible');},3400);
 }
 
-/* ── Audio helpers ───────────────────────────────────── */
 function initAudio(){
-  audioEl = document.getElementById('theme-audio');
-  const btn = document.getElementById('audio-btn');
-
+  audioEl=document.getElementById('theme-audio');
+  const btn=document.getElementById('audio-btn');
   audioEl.volume=0;
-  const play = audioEl.play();
+  const play=audioEl.play();
   if(play instanceof Promise){
-    play.then(()=>{
-      fadeAudio(0.6, 2000);
-    }).catch(()=>{
+    play.then(()=>{fadeAudio(0.6,2000);}).catch(()=>{
       btn.style.display='flex';
       btn.addEventListener('click',e=>{
-        e.stopPropagation();
-        audioEl.play();
-        fadeAudio(0.6,1200);
-        btn.style.opacity='0';
-        setTimeout(()=>btn.style.display='none',600);
+        e.stopPropagation();audioEl.play();fadeAudio(0.6,1200);
+        btn.style.opacity='0';setTimeout(()=>btn.style.display='none',600);
       },{once:true});
     });
   }
 }
 
 let _fadeInterval=null;
-function fadeAudio(targetVol, ms){
-  if(!audioEl) return;
+function fadeAudio(targetVol,ms){
+  if(!audioEl)return;
   clearInterval(_fadeInterval);
   const start=audioEl.volume;
   const steps=Math.max(1,ms/50);
   const inc=(targetVol-start)/steps;
   let step=0;
   _fadeInterval=setInterval(()=>{
-    step++;
-    audioEl.volume=clamp(start+inc*step,0,1);
-    if(step>=steps){
-      audioEl.volume=targetVol;
-      clearInterval(_fadeInterval);
-      if(targetVol===0) audioEl.pause();
-    }
+    step++;audioEl.volume=clamp(start+inc*step,0,1);
+    if(step>=steps){audioEl.volume=targetVol;clearInterval(_fadeInterval);if(targetVol===0)audioEl.pause();}
   },50);
 }
 
 function duckAudio(duck){
-  if(!audioEl||audioDucked===duck) return;
+  if(!audioEl||audioDucked===duck)return;
   audioDucked=duck;
   if(duck){
-    // smooth duck
-    const start=audioEl.volume;
-    clearInterval(_fadeInterval);
-    let v=start;
-    _fadeInterval=setInterval(()=>{
-      v=lerp(v,0.18,.12);
-      audioEl.volume=clamp(v,0,1);
-      if(v<0.2) clearInterval(_fadeInterval);
-    },30);
-  } else {
-    fadeAudio(0.6,600);
-  }
+    const start=audioEl.volume;clearInterval(_fadeInterval);let v=start;
+    _fadeInterval=setInterval(()=>{v=lerp(v,0.18,.12);audioEl.volume=clamp(v,0,1);if(v<0.2)clearInterval(_fadeInterval);},30);
+  }else{fadeAudio(0.6,600);}
 }
 </script>
 </body>
