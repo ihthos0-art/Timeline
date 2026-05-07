@@ -548,14 +548,14 @@ function buildKnot(){
   tailL.setAttribute('d','M -14 42 C -18 56 -22 70 -16 82');
   tailL.setAttribute('class','knot-tail');
   tailL.setAttribute('stroke','#a0813a');tailL.setAttribute('stroke-width','4.5');
-  tailL.dataset.phase='4';
+  tailL.dataset.phase='4a';
 
   /* Phase 4: Right tail */
   const tailR=document.createElementNS('http://www.w3.org/2000/svg','path');
   tailR.setAttribute('d','M 0 44 C 6 58 12 72 6 82');
   tailR.setAttribute('class','knot-tail');
   tailR.setAttribute('stroke','#c4a35a');tailR.setAttribute('stroke-width','4.5');
-  tailR.dataset.phase='4';
+  tailR.dataset.phase='4b';
 
   /* Add glow filter for the knot */
   const defs=document.createElementNS('http://www.w3.org/2000/svg','defs');
@@ -622,7 +622,8 @@ function triggerKnot(){
   drawStrand('[data-phase="3b"]',1400,300);
 
   /* Phase 4: Tails draw downward */
-  drawStrand('[data-phase="4"]',1700,500);
+  drawStrand('[data-phase="4a"]',1700,500);
+  drawStrand('[data-phase="4b"]',1900,400);
 
   /* Phase 5: Tighten animation */
   setTimeout(()=>{knotWrap.classList.remove('visible');knotWrap.classList.add('tighten');},2300);
@@ -632,7 +633,7 @@ function triggerKnot(){
   },2900);
 
   /* Phase 6: Label and prompt */
-  setTimeout(()=>{knotLabel.classList.add('visible');},3000);
+  setTimeout(()=>{knotLabel.textContent='yours.';knotLabel.classList.add('visible');},3000);
   setTimeout(()=>{prompt.textContent='click anywhere to continue';prompt.classList.add('visible');},4200);
 }
 
