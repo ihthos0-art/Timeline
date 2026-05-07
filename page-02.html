@@ -22,7 +22,7 @@
 
       --slide-width: min(30vw, 380px);
       --slide-aspect: 3 / 4;
-      --slide-transition-duration: 800ms;
+      --slide-transition-duration: 700ms;
       --slide-transition-easing: cubic-bezier(0.16, 1, 0.3, 1);
     }
 
@@ -64,7 +64,7 @@
     /* ── Progress Dots ── */
     .progress-dots {
       position: fixed;
-      bottom: max(3vh, 20px);
+      bottom: max(2vh, 14px);
       left: 50%;
       transform: translateX(-50%);
       display: flex;
@@ -127,6 +127,10 @@
     }
     .slider-btn:active {
       transform: translateY(-50%) scale(0.95);
+    }
+    .slider-btn:focus-visible {
+      outline: 2px solid var(--gold-lt);
+      outline-offset: 3px;
     }
     .slider-btn svg {
       width: 20px; height: 20px;
@@ -191,7 +195,7 @@
       position: relative; width: 100%; height: 100%;
       transform-style: preserve-3d;
       transform: rotateX(var(--rotX)) rotateY(var(--rotY));
-      border-radius: 16px; overflow: hidden;
+      border-radius: 12px; overflow: hidden;
     }
 
     /* ── Glass text card ── */
@@ -207,6 +211,25 @@
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
       padding: 44px 36px; gap: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .slide__inner.text-card::before {
+      content: '';
+      position: absolute; inset: -2px;
+      border-radius: 14px;
+      background: conic-gradient(from var(--shimmer-angle, 0deg),
+        transparent 0%, rgba(201,168,76,0.35) 10%, transparent 20%);
+      z-index: -1;
+      animation: shimmerRotate 4s linear infinite;
+    }
+    @keyframes shimmerRotate {
+      to { --shimmer-angle: 360deg; }
+    }
+    @property --shimmer-angle {
+      syntax: '<angle>';
+      initial-value: 0deg;
+      inherits: false;
     }
     .slide[data-current] .slide__inner.text-card {
       box-shadow:
@@ -217,7 +240,7 @@
 
     .slide--image__wrapper {
       position: relative; width: 100%; height: 100%;
-      overflow: hidden; border-radius: 16px;
+      overflow: hidden; border-radius: 12px;
     }
     .slide--image {
       width: 100%; height: 100%;
@@ -228,16 +251,16 @@
       transition: filter var(--slide-transition-duration) var(--slide-transition-easing);
     }
     .slide[data-current] .slide--image { filter: brightness(0.85); }
-    .slide:not([data-current]) .slide--image { filter: brightness(0.5); }
+    .slide:not([data-current]) .slide--image { filter: brightness(0.6); }
 
     .slide--image-tint {
-      position: absolute; inset: 0; border-radius: 16px;
+      position: absolute; inset: 0; border-radius: 12px;
       background: rgba(201,168,76,0.15);
       mix-blend-mode: multiply; pointer-events: none;
     }
 
     .glare {
-      position: absolute; inset: 0; border-radius: 16px;
+      position: absolute; inset: 0; border-radius: 12px;
       pointer-events: none; opacity: 0;
       background: radial-gradient(circle at 50% 30%, rgba(255,230,160,0.13) 0%, transparent 55%);
       transition: opacity 0.35s ease; z-index: 3;
@@ -261,7 +284,7 @@
     /* ── Slide Info — Below Carousel ── */
     .slide-info-container {
       position: fixed;
-      bottom: max(8vh, 60px);
+      bottom: max(9vh, 70px);
       left: 50%;
       transform: translateX(-50%);
       z-index: 100;
@@ -366,7 +389,7 @@
     #fade-overlay {
       position: fixed; inset: 0;
       background: #000; opacity: 1;
-      z-index: 100; transition: opacity 0.8s ease;
+      z-index: 100; transition: opacity 0.6s ease;
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -500,14 +523,14 @@
     function draw(){
       const w=cv.width,h=cv.height,t=Date.now()*.00038;
       cx.fillStyle='#0d0a0e';cx.fillRect(0,0,w,h);
-      const p1=cx.createRadialGradient(w*(.18+.14*Math.sin(t*.9)),h*(.22+.12*Math.cos(t*.7)),0,w*.18,h*.22,w*.72);
-      p1.addColorStop(0,'rgba(74,45,92,.55)');p1.addColorStop(1,'rgba(0,0,0,0)');
+      const p1=cx.createRadialGradient(w*(.22+.12*Math.sin(t*.85)),h*(.3+.1*Math.cos(t*.75)),0,w*.22,h*.3,w*.68);
+      p1.addColorStop(0,'rgba(74,45,92,.5)');p1.addColorStop(1,'rgba(0,0,0,0)');
       cx.fillStyle=p1;cx.fillRect(0,0,w,h);
-      const p2=cx.createRadialGradient(w*(.72+.1*Math.cos(t*.65)),h*(.52+.14*Math.sin(t*.85)),0,w*.72,h*.52,w*.58);
-      p2.addColorStop(0,'rgba(201,168,76,.08)');p2.addColorStop(1,'rgba(0,0,0,0)');
+      const p2=cx.createRadialGradient(w*(.68+.08*Math.cos(t*.6)),h*(.6+.12*Math.sin(t*.9)),0,w*.68,h*.6,w*.55);
+      p2.addColorStop(0,'rgba(201,168,76,.12)');p2.addColorStop(1,'rgba(0,0,0,0)');
       cx.fillStyle=p2;cx.fillRect(0,0,w,h);
-      const p3=cx.createRadialGradient(w*(.5+.07*Math.sin(t*1.2)),h*(.88+.05*Math.cos(t*.8)),0,w*.5,h*.88,w*.65);
-      p3.addColorStop(0,'rgba(46,31,58,.6)');p3.addColorStop(1,'rgba(0,0,0,0)');
+      const p3=cx.createRadialGradient(w*(.45+.06*Math.sin(t*1.1)),h*(.82+.06*Math.cos(t*.7)),0,w*.45,h*.82,w*.6);
+      p3.addColorStop(0,'rgba(46,31,58,.55)');p3.addColorStop(1,'rgba(0,0,0,0)');
       cx.fillStyle=p3;cx.fillRect(0,0,w,h);
       requestAnimationFrame(draw);
     }
@@ -608,7 +631,7 @@
     busy=true;
     currentIdx=wrap(currentIdx+direction,TOTAL);
     applyStates();setupTilt();
-    setTimeout(()=>{busy=false;},800);
+    setTimeout(()=>{busy=false;},700);
   }
 
   let currentSlideEl=null;
@@ -671,7 +694,7 @@
     const idx=+d.dataset.idx;
     if(idx===currentIdx||busy)return;
     busy=true;currentIdx=idx;applyStates();setupTilt();
-    setTimeout(()=>{busy=false;},800);
+    setTimeout(()=>{busy=false;},700);
   });});
 
   document.addEventListener('keydown',e=>{
@@ -702,7 +725,7 @@
     if(currentIdx!==TOTAL-1)return;
     if(e.target.closest('.slider-btn')||e.target.closest('.progress-dot'))return;
     fadeOverlay.style.pointerEvents='auto';fadeOverlay.style.opacity='1';
-    setTimeout(()=>{window.location.href='page-03.html';},820);
+    setTimeout(()=>{window.location.href='page-03.html';},600);
   });
 
   (function(){

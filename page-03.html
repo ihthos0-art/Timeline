@@ -6,7 +6,7 @@
   <title>Hilo — Journey</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet"/>
   <style>
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 
@@ -23,7 +23,7 @@
     body{
       background:var(--bg);
       overflow-x:hidden;
-      font-family:'Cormorant Garamond',Georgia,serif;
+      font-family:'Playfair Display',Georgia,serif;
       user-select:none;
     }
 
@@ -51,12 +51,13 @@
       pointer-events:none;z-index:5;
     }
     #rope-shadow-path{
-      fill:none;stroke:var(--rope-shadow);stroke-width:7;
+      fill:none;stroke:var(--rope-shadow);stroke-width:9;
       stroke-linecap:round;stroke-linejoin:round;
     }
     #rope-path{
-      fill:none;stroke:var(--rope-col);stroke-width:4;
+      fill:none;stroke:var(--rope-col);stroke-width:5;
       stroke-linecap:round;stroke-linejoin:round;
+      filter:drop-shadow(0 0 6px rgba(201,168,76,0.25));
     }
     .pin-dot{
       fill:var(--gold);opacity:0;
@@ -86,8 +87,8 @@
       to{opacity:1;transform:scale(1) translateY(0) rotate(var(--rot));}
     }
     @keyframes gentleSway{
-      0%,100%{transform:rotate(calc(var(--rot) - 1.5deg))}
-      50%{transform:rotate(calc(var(--rot) + 1.5deg))}
+      0%,100%{transform:rotate(calc(var(--rot) - 2.5deg))}
+      50%{transform:rotate(calc(var(--rot) + 2.5deg))}
     }
 
     .pin-head{
@@ -151,12 +152,14 @@
     #knot-label.visible{opacity:1}
 
     #audio-btn{
-      display:none;position:fixed;bottom:3vh;right:3vw;z-index:40;
-      background:rgba(20,12,28,.7);border:1px solid rgba(201,168,76,.35);
-      border-radius:20px;padding:7px 16px;color:rgba(245,237,224,.7);
+      display:flex;align-items:center;gap:6px;position:fixed;bottom:3vh;right:3vw;z-index:40;
+      background:rgba(20,12,28,.6);border:1px solid rgba(201,168,76,.25);
+      border-radius:20px;padding:7px 16px;color:rgba(245,237,224,.55);
       font-family:inherit;font-size:13px;font-style:italic;cursor:pointer;
-      backdrop-filter:blur(8px);transition:opacity .3s ease;
+      backdrop-filter:blur(8px);transition:opacity .3s ease,background .3s ease;
+      opacity:.55;
     }
+    #audio-btn:hover{opacity:1;background:rgba(20,12,28,.8);border-color:rgba(201,168,76,.5)}
 
     #prompt{
       position:fixed;bottom:6vh;left:50%;transform:translateX(-50%);z-index:30;
@@ -167,7 +170,7 @@
     #prompt.visible{opacity:1;animation:promptBreathe 3s ease-in-out infinite}
     @keyframes promptBreathe{0%,100%{opacity:.28}50%{opacity:.62}}
 
-    #fade-overlay{position:fixed;inset:0;background:#000;opacity:1;z-index:100;transition:opacity .8s ease}
+    #fade-overlay{position:fixed;inset:0;background:#000;opacity:1;z-index:100;transition:opacity .6s ease}
 
     @media(prefers-reduced-motion:reduce){
       .polaroid.entering,.polaroid.entered .polaroid-frame{animation:none!important;opacity:1}
@@ -242,14 +245,14 @@ function seeded(n){const x=Math.sin(n*127.1+311.7)*43758.5453;return x-Math.floo
   function draw(){
     const w=cv.width,h=cv.height,t=Date.now()*.00038;
     cx.fillStyle='#0d0a0e';cx.fillRect(0,0,w,h);
-    const p1=cx.createRadialGradient(w*(.18+.14*Math.sin(t*.9)),h*(.22+.12*Math.cos(t*.7)),0,w*.18,h*.22,w*.72);
-    p1.addColorStop(0,'rgba(74,45,92,.55)');p1.addColorStop(1,'rgba(0,0,0,0)');
+    const p1=cx.createRadialGradient(w*(.15+.12*Math.sin(t*.85)),h*(.18+.1*Math.cos(t*.65)),0,w*.15,h*.18,w*.7);
+    p1.addColorStop(0,'rgba(74,45,92,.45)');p1.addColorStop(1,'rgba(0,0,0,0)');
     cx.fillStyle=p1;cx.fillRect(0,0,w,h);
-    const p2=cx.createRadialGradient(w*(.72+.1*Math.cos(t*.65)),h*(.52+.14*Math.sin(t*.85)),0,w*.72,h*.52,w*.58);
-    p2.addColorStop(0,'rgba(201,168,76,.08)');p2.addColorStop(1,'rgba(0,0,0,0)');
+    const p2=cx.createRadialGradient(w*(.6+.1*Math.cos(t*.7)),h*(.45+.1*Math.sin(t*.9)),0,w*.6,h*.45,w*.55);
+    p2.addColorStop(0,'rgba(201,168,76,.1)');p2.addColorStop(1,'rgba(0,0,0,0)');
     cx.fillStyle=p2;cx.fillRect(0,0,w,h);
-    const p3=cx.createRadialGradient(w*(.5+.07*Math.sin(t*1.2)),h*(.88+.05*Math.cos(t*.8)),0,w*.5,h*.88,w*.65);
-    p3.addColorStop(0,'rgba(46,31,58,.6)');p3.addColorStop(1,'rgba(0,0,0,0)');
+    const p3=cx.createRadialGradient(w*(.45+.08*Math.sin(t*1.1)),h*(.8+.06*Math.cos(t*.75)),0,w*.45,h*.8,w*.62);
+    p3.addColorStop(0,'rgba(46,31,58,.55)');p3.addColorStop(1,'rgba(0,0,0,0)');
     cx.fillStyle=p3;cx.fillRect(0,0,w,h);
     requestAnimationFrame(draw);
   }
@@ -259,7 +262,7 @@ function seeded(n){const x=Math.sin(n*127.1+311.7)*43758.5453;return x-Math.floo
 /* ── Particles ── */
 (function(){
   const cv=document.getElementById('particle-canvas'),cx=cv.getContext('2d');
-  const particles=[];const COUNT=25;
+  const particles=[];const COUNT=40;
   function resize(){cv.width=innerWidth;cv.height=innerHeight}
   resize();window.addEventListener('resize',resize);
   for(let i=0;i<COUNT;i++){
@@ -470,8 +473,8 @@ function buildScene(){
   document.addEventListener('click',()=>{
     if(!knotAnimDone)return;
     fadeEl.style.pointerEvents='auto';fadeEl.style.opacity='1';
-    fadeAudio(0,800);
-    setTimeout(()=>{window.location.href='page-04.html';},820);
+    fadeAudio(0,600);
+    setTimeout(()=>{window.location.href='page-04.html';},620);
   });
 }
 
@@ -541,17 +544,19 @@ function triggerKnot(){
 function initAudio(){
   audioEl=document.getElementById('theme-audio');
   const btn=document.getElementById('audio-btn');
+  let playing=false;
   audioEl.volume=0;
   const play=audioEl.play();
   if(play instanceof Promise){
-    play.then(()=>{fadeAudio(0.6,2000);}).catch(()=>{
-      btn.style.display='flex';
-      btn.addEventListener('click',e=>{
-        e.stopPropagation();audioEl.play();fadeAudio(0.6,1200);
-        btn.style.opacity='0';setTimeout(()=>btn.style.display='none',600);
-      },{once:true});
+    play.then(()=>{fadeAudio(0.6,2000);playing=true;btn.textContent='♪ pause';}).catch(()=>{
+      btn.textContent='♪ play';
     });
   }
+  btn.addEventListener('click',e=>{
+    e.stopPropagation();
+    if(playing){audioEl.pause();playing=false;btn.textContent='♪ play';}
+    else{audioEl.play();fadeAudio(0.6,800);playing=true;btn.textContent='♪ pause';}
+  });
 }
 
 let _fadeInterval=null;
