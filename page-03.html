@@ -92,14 +92,14 @@
     }
 
     .pin-head{
-      position:absolute;top:-6px;left:50%;transform:translateX(-50%);
+      position:absolute;top:-6px;left:calc(50% - var(--pin-offset,0px));transform:translateX(-50%);
       width:14px;height:14px;border-radius:50%;
       background:radial-gradient(circle at 35% 35%,#e8c97a,#9a6f20);
       box-shadow:0 2px 8px rgba(0,0,0,.5),0 0 12px rgba(201,168,76,0.3);
       z-index:2;
     }
     .hang-thread{
-      position:absolute;top:8px;left:50%;transform:translateX(-50%);
+      position:absolute;top:8px;left:calc(50% - var(--pin-offset,0px));transform:translateX(-50%);
       width:1.5px;height:20px;
       background:linear-gradient(to bottom,rgba(196,163,90,0.7),rgba(196,163,90,0.3));
       z-index:1;
@@ -384,6 +384,7 @@ function buildScene(){
       `--rot:${pt.rot}deg`,
       `--sw-dur:${4+seeded(i*7)*3.2|0}s`,
       `--sw-delay:-${(seeded(i*11)*4).toFixed(1)}s`,
+      `--pin-offset:${pt.side*16}px`,
     ].join(';');
 
     wrap.innerHTML=`
