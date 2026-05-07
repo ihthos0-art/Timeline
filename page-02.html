@@ -145,12 +145,12 @@
     }
     .slides-wrapper > * { grid-area: 1 / -1; }
 
-    .slides, .slides-infos {
+    .slides {
       width: 100%; height: 100%;
       pointer-events: none;
       display: grid; place-items: center;
     }
-    .slides > *, .slides-infos > * { grid-area: 1 / -1; }
+    .slides > * { grid-area: 1 / -1; }
 
     /* ── Slide Card ── */
     .slide {
@@ -258,25 +258,28 @@
       font-weight: 600; line-height: 2;
     }
 
-    /* ── Slide Info ── */
-    .slide-info {
-      position: relative; width: var(--slide-width);
-      height: calc(var(--slide-width) * var(--slide-aspect));
-      user-select: none; pointer-events: none;
-      perspective: 800px; z-index: 100;
+    /* ── Slide Info — Below Carousel ── */
+    .slide-info-container {
+      position: fixed;
+      bottom: max(8vh, 60px);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      text-align: center;
+      pointer-events: none;
+      width: max(300px, 40vw);
+      max-width: 600px;
     }
-    .slide-info__inner {
-      --rotX: 0deg; --rotY: 0deg;
-      position: relative; width: 100%; height: 100%;
-      transform-style: preserve-3d;
-      transform: rotateX(var(--rotX)) rotateY(var(--rotY));
+    .slide-info {
+      position: absolute;
+      bottom: 0;
+      left: 0; right: 0;
+      user-select: none; pointer-events: none;
+      text-align: center;
     }
     .slide-info--text__wrapper {
-      --z-offset: 50px;
-      position: absolute; height: fit-content;
-      left: -18%; bottom: 12%;
-      transform: translateZ(var(--z-offset));
-      z-index: 2; pointer-events: none;
+      display: inline-block;
+      text-align: center;
     }
     .slide-info--text {
       font-family: 'Cormorant Garamond', Georgia, serif;
@@ -284,8 +287,8 @@
     }
     .slide-info--text span {
       display: block; white-space: nowrap;
-      transition: var(--slide-transition-duration) var(--slide-transition-easing);
-      transition-property: opacity, transform;
+      transition: opacity 400ms var(--slide-transition-easing),
+        transform 400ms var(--slide-transition-easing);
     }
     .slide-info[data-current] .slide-info--text span {
       opacity: 1; transform: translate3d(0, 0, 0);
@@ -300,25 +303,23 @@
       transition-delay: 500ms;
     }
     .slide-info:not([data-current]) .slide-info--text span {
-      opacity: 0; transform: translate3d(0, 100%, 0);
+      opacity: 0; transform: translate3d(0, 20px, 0);
       transition-delay: 0ms;
     }
     .slide-info--text[data-title] {
-      font-size: clamp(1.6rem, 2.8vw, 2.4rem);
+      font-size: clamp(1.4rem, 2.4vw, 2rem);
       font-weight: 700; font-style: italic;
       letter-spacing: 0.04em;
       text-shadow: 0 2px 12px rgba(0,0,0,0.6);
     }
     .slide-info--text[data-subtitle] {
-      margin-left: 0.8em;
-      font-size: clamp(1.1rem, 2vw, 1.8rem);
+      font-size: clamp(1rem, 1.6vw, 1.4rem);
       font-weight: 400; font-style: italic;
       color: rgba(245,237,224,0.8);
       text-shadow: 0 2px 10px rgba(0,0,0,0.5);
     }
     .slide-info--text[data-description] {
-      margin-left: 0.3em;
-      font-size: clamp(0.85rem, 1.4vw, 1rem);
+      font-size: clamp(0.85rem, 1.2vw, 0.95rem);
       font-weight: 300;
       color: rgba(245,237,224,0.6);
     }
@@ -440,43 +441,35 @@
           </div>
           <div class="slide__bg" style="--bg-img: linear-gradient(135deg, #0d0a0e 0%, #4a2d5c 40%, #c9a84c33 100%)"></div>
         </div>
+      </div>
 
-        <div class="slides-infos">
-          <div class="slide-info" data-current>
-            <div class="slide-info__inner">
-              <div class="slide-info--text__wrapper">
-                <div data-title class="slide-info--text"><span>First Page</span></div>
-                <div data-subtitle class="slide-info--text"><span>No Animations</span></div>
-                <div data-description class="slide-info--text"><span>where it all started</span></div>
-              </div>
-            </div>
+      <div class="slide-info-container">
+        <div class="slide-info" data-current>
+          <div class="slide-info--text__wrapper">
+            <div data-title class="slide-info--text"><span>First Page</span></div>
+            <div data-subtitle class="slide-info--text"><span>No Animations</span></div>
+            <div data-description class="slide-info--text"><span>where it all started</span></div>
           </div>
-          <div class="slide-info" data-next>
-            <div class="slide-info__inner">
-              <div class="slide-info--text__wrapper">
-                <div data-title class="slide-info--text"><span>Minecraft World</span></div>
-                <div data-subtitle class="slide-info--text"><span>Building Together</span></div>
-                <div data-description class="slide-info--text"><span>where i put your pictures</span></div>
-              </div>
-            </div>
+        </div>
+        <div class="slide-info" data-next>
+          <div class="slide-info--text__wrapper">
+            <div data-title class="slide-info--text"><span>Minecraft World</span></div>
+            <div data-subtitle class="slide-info--text"><span>Building Together</span></div>
+            <div data-description class="slide-info--text"><span>where i put your pictures</span></div>
           </div>
-          <div class="slide-info" data-previous>
-            <div class="slide-info__inner">
-              <div class="slide-info--text__wrapper">
-                <div data-title class="slide-info--text"><span>Minimal Design</span></div>
-                <div data-subtitle class="slide-info--text"><span>Video Edit</span></div>
-                <div data-description class="slide-info--text"><span>a website with a video edit of you</span></div>
-              </div>
-            </div>
+        </div>
+        <div class="slide-info" data-previous>
+          <div class="slide-info--text__wrapper">
+            <div data-title class="slide-info--text"><span>Minimal Design</span></div>
+            <div data-subtitle class="slide-info--text"><span>Video Edit</span></div>
+            <div data-description class="slide-info--text"><span>a website with a video edit of you</span></div>
           </div>
-          <div class="slide-info">
-            <div class="slide-info__inner">
-              <div class="slide-info--text__wrapper">
-                <div data-title class="slide-info--text"><span>This Is Different</span></div>
-                <div data-subtitle class="slide-info--text"><span>Skills</span></div>
-                <div data-description class="slide-info--text"><span>without the nerdy parts</span></div>
-              </div>
-            </div>
+        </div>
+        <div class="slide-info">
+          <div class="slide-info--text__wrapper">
+            <div data-title class="slide-info--text"><span>This Is Different</span></div>
+            <div data-subtitle class="slide-info--text"><span>Skills</span></div>
+            <div data-description class="slide-info--text"><span>without the nerdy parts</span></div>
           </div>
         </div>
       </div>
@@ -655,8 +648,6 @@
       if(inner){inner.style.setProperty('--rotX',t.rotXCur.toFixed(2)+'deg');inner.style.setProperty('--rotY',t.rotYCur.toFixed(2)+'deg');}
       const img=slides[i].querySelector('.slide--image');
       if(img){img.style.setProperty('--bgPosX',t.bgPosXCur.toFixed(2)+'%');img.style.setProperty('--bgPosY',t.bgPosYCur.toFixed(2)+'%');}
-      const infoInner=slidesInfo[i].querySelector('.slide-info__inner');
-      if(infoInner){infoInner.style.setProperty('--rotX',t.rotXCur.toFixed(2)+'deg');infoInner.style.setProperty('--rotY',t.rotYCur.toFixed(2)+'deg');}
     });
 
     const glare=slides[currentIdx].querySelector('.glare');
