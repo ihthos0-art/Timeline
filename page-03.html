@@ -312,7 +312,7 @@ function buildScene(){
   const cx=W/2;
   const N=MEDIA_ITEMS.length;
   const SPACING=390;
-  const AMP=clamp(W*.42,120,200);
+  const AMP=clamp(W*.42,140,320);
   const ROPE_TOP=10;
 
   /* ── Page dimensions ── */
@@ -329,9 +329,9 @@ function buildScene(){
   const pts=[];
   for(let i=0;i<N;i++){
     const side=i%2===0?1:-1;
-    const xVar=(seeded(i*3)-.5)*24;
+    const xVar=(seeded(i*3)-.5)*36;
     const yVar=(seeded(i*3+1)-.5)*18;
-    const rot=side*(3+seeded(i*3+2)*5.5);
+    const rot=side*(4+seeded(i*3+2)*7);
     pts.push({x:cx+side*(AMP+xVar),y:ROPE_TOP+(i+1)*SPACING+yVar,rot,side});
   }
   const knotY=pts[N-1].y+290;
