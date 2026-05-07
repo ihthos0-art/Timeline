@@ -108,14 +108,14 @@
     .polaroid-frame{
       position:relative;
       background:#f5f0e8;
-      padding:12px 12px 36px;
+      padding:8px 8px 28px;
       border-radius:3px;
       box-shadow:
         0 10px 40px rgba(0,0,0,.55),
         0 2px 8px rgba(0,0,0,.3),
         0 0 0 1px rgba(201,168,76,0.08);
       margin-top:28px;
-      width:clamp(140px,16vw,190px);
+      width:clamp(180px,22vw,280px);
     }
     .polaroid-media{
       display:block;width:100%;aspect-ratio:4/3;
@@ -125,8 +125,8 @@
     video.polaroid-media{cursor:pointer}
 
     .polaroid-caption{
-      height:22px;display:flex;align-items:center;justify-content:center;
-      font-size:10px;font-style:italic;font-weight:300;
+      height:18px;display:flex;align-items:center;justify-content:center;
+      font-size:9px;font-style:italic;font-weight:300;
       color:rgba(60,40,20,.5);letter-spacing:.06em;
     }
 
@@ -311,9 +311,9 @@ function buildScene(){
   const VH=window.innerHeight;
   const cx=W/2;
   const N=MEDIA_ITEMS.length;
-  const SPACING=370;
-  const AMP=clamp(W*.34,90,148);
-  const ROPE_TOP=70;
+  const SPACING=390;
+  const AMP=clamp(W*.42,120,200);
+  const ROPE_TOP=10;
 
   /* ── Page dimensions ── */
   const PAGE_H=ROPE_TOP+N*SPACING+700+VH;
@@ -353,6 +353,12 @@ function buildScene(){
   ropeShadowEl.style.strokeDashoffset=totalLen;
 
   /* ── Pin dots ── */
+  // Top anchor dot
+  const anchorDot=document.createElementNS('http://www.w3.org/2000/svg','circle');
+  anchorDot.setAttribute('cx',cx);anchorDot.setAttribute('cy',ROPE_TOP);anchorDot.setAttribute('r','6');
+  anchorDot.classList.add('pin-dot','visible');
+  pinGroup.appendChild(anchorDot);
+
   pts.forEach((pt,i)=>{
     const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
     c.setAttribute('cx',pt.x);c.setAttribute('cy',pt.y);c.setAttribute('r','5');
@@ -364,13 +370,13 @@ function buildScene(){
   const frag=document.createDocumentFragment();
   pts.forEach((pt,i)=>{
     const item=MEDIA_ITEMS[i];
-    const pw=clamp(W*.16,140,190);
+    const pw=clamp(W*.22,180,280);
 
     const wrap=document.createElement('div');
     wrap.className='polaroid';wrap.dataset.idx=i;
     wrap.style.cssText=[
-      `left:${pt.x-pw/2+pt.side*12}px`,
-      `top:${pt.y-38}px`,
+      `left:${pt.x-pw/2+pt.side*16}px`,
+      `top:${pt.y-28}px`,
       `--rot:${pt.rot}deg`,
       `--sw-dur:${4+seeded(i*7)*3.2|0}s`,
       `--sw-delay:-${(seeded(i*11)*4).toFixed(1)}s`,
@@ -480,7 +486,7 @@ function buildScene(){
 
 function buildRopePath(cx,ropeTop,pts,knotY){
   let d=`M ${cx} ${ropeTop}`;
-  d+=` C ${cx} ${ropeTop+80} ${pts[0].x} ${pts[0].y-60} ${pts[0].x} ${pts[0].y}`;
+  d+=` C ${cx} ${ropeTop+120} ${pts[0].x} ${pts[0].y-80} ${pts[0].x} ${pts[0].y}`;
   for(let i=0;i<pts.length-1;i++){
     const a=pts[i],b=pts[i+1];
     const sp=b.y-a.y;
