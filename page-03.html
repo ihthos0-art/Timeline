@@ -115,12 +115,12 @@
         0 2px 8px rgba(0,0,0,.3),
         0 0 0 1px rgba(201,168,76,0.08);
       margin-top:28px;
-      width:clamp(180px,22vw,280px);
+      width:clamp(160px,18vw,220px);
     }
     .polaroid-media{
-      display:block;width:100%;aspect-ratio:4/3;
-      object-fit:cover;border-radius:1px;
-      background:rgba(46,31,58,.45);
+      display:block;width:100%;aspect-ratio:3/4;
+      object-fit:contain;border-radius:1px;
+      background:#f5f0e8;
     }
     video.polaroid-media{cursor:pointer}
 
@@ -138,9 +138,9 @@
     }
     #knot-wrap.visible{animation:knotAppear .5s cubic-bezier(0.34,1.56,0.64,1) forwards}
     @keyframes knotAppear{from{opacity:0;transform:translateX(-50%) scale(.5)}to{opacity:1;transform:translateX(-50%) scale(1.15)}}
-    #knot-wrap.tighten{animation:knotTighten .6s cubic-bezier(0.34,1.56,0.64,1) forwards}
+    #knot-wrap.tighten{opacity:1;animation:knotTighten .6s cubic-bezier(0.34,1.56,0.64,1) forwards}
     @keyframes knotTighten{from{transform:translateX(-50%) scale(1.15)}to{transform:translateX(-50%) scale(1)}}
-    #knot-wrap.settled{animation:knotBreathe 4s ease-in-out infinite}
+    #knot-wrap.settled{opacity:1;animation:knotBreathe 4s ease-in-out infinite}
     @keyframes knotBreathe{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.02)}}
 
     #knot-svg{overflow:visible}
@@ -224,17 +224,135 @@
 /* ═══════════════════════════════════════════
    MEDIA ITEMS — edit filenames here
    ═══════════════════════════════════════════ */
-const MEDIA_ITEMS=(function(){
-  const items=[];
-  for(let i=1;i<=119;i++){
-    items.push({type:'photo',src:`./assets/photo-${String(i).padStart(3,'0')}.jpg`});
-  }
-  const vSlots=[14,26,39,53,66,79,93,108];
-  vSlots.forEach((slot,vi)=>{
-    items.splice(slot+vi,0,{type:'video',src:`./assets/video-0${vi+1}.mp4`});
-  });
-  return items;
-})();
+const MEDIA_ITEMS = [
+    {type:'photo', src:'./assets/photo-001.jpg'},
+    {type:'photo', src:'./assets/photo-002.jpg'},
+    {type:'photo', src:'./assets/photo-003.jpg'},
+    {type:'photo', src:'./assets/photo-004.jpg'},
+    {type:'photo', src:'./assets/photo-005.jpg'},
+    {type:'photo', src:'./assets/photo-006.jpg'},
+    {type:'photo', src:'./assets/photo-007.jpg'},
+    {type:'video', src:'./assets/video-01.mp4'},
+    {type:'photo', src:'./assets/photo-008.jpg'},
+    {type:'video', src:'./assets/video-02.mp4'},
+    {type:'video', src:'./assets/video-03.mp4'},
+    {type:'photo', src:'./assets/photo-009.jpg'},
+    {type:'video', src:'./assets/video-04.mp4'},
+    {type:'photo', src:'./assets/photo-010.jpg'},
+    {type:'photo', src:'./assets/photo-011.jpg'},
+    {type:'photo', src:'./assets/photo-012.jpg'},
+    {type:'photo', src:'./assets/photo-013.jpg'},
+    {type:'photo', src:'./assets/photo-014.jpg'},
+    {type:'photo', src:'./assets/photo-015.jpg'},
+    {type:'video', src:'./assets/video-05.mp4'},
+    {type:'photo', src:'./assets/photo-016.jpg'},
+    {type:'photo', src:'./assets/photo-017.jpg'},
+    {type:'photo', src:'./assets/photo-018.jpg'},
+    {type:'photo', src:'./assets/photo-019.jpg'},
+    {type:'photo', src:'./assets/photo-020.jpg'},
+    {type:'photo', src:'./assets/photo-021.jpg'},
+    {type:'photo', src:'./assets/photo-022.jpg'},
+    {type:'photo', src:'./assets/photo-023.jpg'},
+    {type:'photo', src:'./assets/photo-024.jpg'},
+    {type:'photo', src:'./assets/photo-025.jpg'},
+    {type:'photo', src:'./assets/photo-026.jpg'},
+    {type:'photo', src:'./assets/photo-027.jpg'},
+    {type:'photo', src:'./assets/photo-028.jpg'},
+    {type:'photo', src:'./assets/photo-029.jpg'},
+    {type:'photo', src:'./assets/photo-030.jpg'},
+    {type:'photo', src:'./assets/photo-031.jpg'},
+    {type:'photo', src:'./assets/photo-032.jpg'},
+    {type:'photo', src:'./assets/photo-033.jpg'},
+    {type:'photo', src:'./assets/photo-034.jpg'},
+    {type:'photo', src:'./assets/photo-035.jpg'},
+    {type:'photo', src:'./assets/photo-036.jpg'},
+    {type:'photo', src:'./assets/photo-037.jpg'},
+    {type:'photo', src:'./assets/photo-038.jpg'},
+    {type:'photo', src:'./assets/photo-039.jpg'},
+    {type:'photo', src:'./assets/photo-040.jpg'},
+    {type:'photo', src:'./assets/photo-041.jpg'},
+    {type:'photo', src:'./assets/photo-042.jpg'},
+    {type:'photo', src:'./assets/photo-043.jpg'},
+    {type:'photo', src:'./assets/photo-044.jpg'},
+    {type:'photo', src:'./assets/photo-045.jpg'},
+    {type:'photo', src:'./assets/photo-046.jpg'},
+    {type:'photo', src:'./assets/photo-047.jpg'},
+    {type:'photo', src:'./assets/photo-048.jpg'},
+    {type:'photo', src:'./assets/photo-049.jpg'},
+    {type:'photo', src:'./assets/photo-050.jpg'},
+    {type:'photo', src:'./assets/photo-051.jpg'},
+    {type:'photo', src:'./assets/photo-052.jpg'},
+    {type:'video', src:'./assets/video-06.mp4'},
+    {type:'video', src:'./assets/video-07.mp4'},
+    {type:'photo', src:'./assets/photo-053.jpg'},
+    {type:'photo', src:'./assets/photo-054.jpg'},
+    {type:'photo', src:'./assets/photo-055.jpg'},
+    {type:'photo', src:'./assets/photo-056.jpg'},
+    {type:'photo', src:'./assets/photo-057.jpg'},
+    {type:'photo', src:'./assets/photo-058.jpg'},
+    {type:'photo', src:'./assets/photo-059.jpg'},
+    {type:'photo', src:'./assets/photo-060.jpg'},
+    {type:'photo', src:'./assets/photo-061.jpg'},
+    {type:'photo', src:'./assets/photo-062.jpg'},
+    {type:'photo', src:'./assets/photo-063.jpg'},
+    {type:'photo', src:'./assets/photo-064.jpg'},
+    {type:'photo', src:'./assets/photo-065.jpg'},
+    {type:'video', src:'./assets/video-08.mp4'},
+    {type:'video', src:'./assets/video-09.mp4'},
+    {type:'photo', src:'./assets/photo-066.jpg'},
+    {type:'video', src:'./assets/video-10.mp4'},
+    {type:'photo', src:'./assets/photo-067.jpg'},
+    {type:'video', src:'./assets/video-11.mp4'},
+    {type:'photo', src:'./assets/photo-068.jpg'},
+    {type:'photo', src:'./assets/photo-069.jpg'},
+    {type:'photo', src:'./assets/photo-070.jpg'},
+    {type:'video', src:'./assets/video-12.mp4'},
+    {type:'photo', src:'./assets/photo-071.jpg'},
+    {type:'photo', src:'./assets/photo-072.jpg'},
+    {type:'photo', src:'./assets/photo-073.jpg'},
+    {type:'photo', src:'./assets/photo-074.jpg'},
+    {type:'photo', src:'./assets/photo-075.jpg'},
+    {type:'photo', src:'./assets/photo-076.jpg'},
+    {type:'photo', src:'./assets/photo-077.jpg'},
+    {type:'photo', src:'./assets/photo-078.jpg'},
+    {type:'photo', src:'./assets/photo-079.jpg'},
+    {type:'photo', src:'./assets/photo-080.jpg'},
+    {type:'photo', src:'./assets/photo-081.jpg'},
+    {type:'photo', src:'./assets/photo-082.jpg'},
+    {type:'photo', src:'./assets/photo-083.jpg'},
+    {type:'photo', src:'./assets/photo-084.jpg'},
+    {type:'photo', src:'./assets/photo-085.jpg'},
+    {type:'photo', src:'./assets/photo-086.jpg'},
+    {type:'photo', src:'./assets/photo-087.jpg'},
+    {type:'photo', src:'./assets/photo-088.jpg'},
+    {type:'photo', src:'./assets/photo-089.jpg'},
+    {type:'photo', src:'./assets/photo-090.jpg'},
+    {type:'photo', src:'./assets/photo-091.jpg'},
+    {type:'photo', src:'./assets/photo-092.jpg'},
+    {type:'photo', src:'./assets/photo-093.jpg'},
+    {type:'photo', src:'./assets/photo-094.jpg'},
+    {type:'photo', src:'./assets/photo-095.jpg'},
+    {type:'photo', src:'./assets/photo-096.jpg'},
+    {type:'photo', src:'./assets/photo-097.jpg'},
+    {type:'photo', src:'./assets/photo-098.jpg'},
+    {type:'photo', src:'./assets/photo-099.jpg'},
+    {type:'photo', src:'./assets/photo-100.jpg'},
+    {type:'photo', src:'./assets/photo-101.jpg'},
+    {type:'photo', src:'./assets/photo-102.jpg'},
+    {type:'photo', src:'./assets/photo-103.jpg'},
+    {type:'video', src:'./assets/video-13.mp4'},
+    {type:'photo', src:'./assets/photo-104.jpg'},
+    {type:'photo', src:'./assets/photo-105.jpg'},
+    {type:'photo', src:'./assets/photo-106.jpg'},
+    {type:'photo', src:'./assets/photo-107.jpg'},
+    {type:'photo', src:'./assets/photo-108.jpg'},
+    {type:'photo', src:'./assets/photo-109.jpg'},
+    {type:'photo', src:'./assets/photo-110.jpg'},
+    {type:'video', src:'./assets/video-14.mp4'},
+    {type:'photo', src:'./assets/photo-111.jpg'},
+    {type:'photo', src:'./assets/photo-112.jpg'},
+    {type:'photo', src:'./assets/photo-113.jpg'}
+];
 
 /* ── Utilities ── */
 const lerp=(a,b,t)=>a+(b-a)*t;
