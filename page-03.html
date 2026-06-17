@@ -136,16 +136,7 @@
       display:flex;flex-direction:column;align-items:center;gap:14px;
       opacity:0;z-index:15;
     }
-    #knot-wrap.visible{animation:knotAppear .5s cubic-bezier(0.34,1.56,0.64,1) forwards}
-    @keyframes knotAppear{from{opacity:0;transform:translateX(-50%) scale(.5)}to{opacity:1;transform:translateX(-50%) scale(1.15)}}
-    #knot-wrap.tighten{opacity:1;animation:knotTighten .6s cubic-bezier(0.34,1.56,0.64,1) forwards}
-    @keyframes knotTighten{from{transform:translateX(-50%) scale(1.15)}to{transform:translateX(-50%) scale(1)}}
-    #knot-wrap.settled{opacity:1;animation:knotBreathe 4s ease-in-out infinite}
-    @keyframes knotBreathe{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.02)}}
-
-    #knot-svg{overflow:visible}
-    .knot-strand{fill:none;stroke-linecap:round;stroke-linejoin:round}
-    .knot-tail{fill:none;stroke-linecap:round;stroke-linejoin:round}
+    #knot-wrap.visible{opacity:1}
 
     #knot-label{
       font-size:clamp(13px,1.4vw,16px);font-style:italic;font-weight:300;
@@ -207,7 +198,6 @@
   </svg>
   <!-- polaroids injected by JS -->
   <div id="knot-wrap">
-    <svg id="knot-svg" width="120" height="140" viewBox="-60 -55 120 140"></svg>
     <p id="knot-label">still going</p>
   </div>
 </div>
@@ -520,10 +510,9 @@ function buildScene(){
   });
   scene.appendChild(frag);
 
-  /* ── Knot position ── */
+  /* ── End label position ── */
   const knotWrap=document.getElementById('knot-wrap');
   knotWrap.style.top=knotY+'px';
-  buildKnot();
 
   /* ── Scroll animation ── */
   const MAX_SCROLL=PAGE_H-VH;
@@ -622,138 +611,17 @@ function buildRopePath(cx,ropeTop,pts,knotY){
   return d;
 }
 
-function buildKnot(){
-  const svg=document.getElementById('knot-svg');
-  svg.setAttribute('viewBox','-60 -55 120 140');
-
-  /* Phase 1: Back strand (darker — goes behind the crossing) */
-  const backStrand=document.createElementNS('http://www.w3.org/2000/svg','path');
-  backStrand.setAttribute('d',
-    'M -8 -42 C -34 -42 -48 -16 -42 6 C -36 24 -18 32 0 32'
-  );
-  backStrand.setAttribute('class','knot-strand');
-  backStrand.setAttribute('stroke','#8a6d2e');backStrand.setAttribute('stroke-width','6');
-  backStrand.dataset.phase='1';
-
-  /* Phase 2: Loop strand (forms the bight/loop) */
-  const loopStrand=document.createElementNS('http://www.w3.org/2000/svg','path');
-  loopStrand.setAttribute('d',
-    'M 0 32 C 18 32 36 24 42 6 C 48 -16 34 -42 8 -42'
-  );
-  loopStrand.setAttribute('class','knot-strand');
-  loopStrand.setAttribute('stroke','#a0813a');loopStrand.setAttribute('stroke-width','6');
-  loopStrand.dataset.phase='2';
-
-  /* Phase 3: Over strand (passes through the loop — brighter, on top) */
-  const overStrand=document.createElementNS('http://www.w3.org/2000/svg','path');
-  overStrand.setAttribute('d',
-    'M 0 -42 C -2 -28 2 -12 0 2 C -2 16 -8 28 -14 42'
-  );
-  overStrand.setAttribute('class','knot-strand');
-  overStrand.setAttribute('stroke','#c4a35a');overStrand.setAttribute('stroke-width','6');
-  overStrand.dataset.phase='3';
-
-  /* Phase 3b: Crossing bridge (drawn on top to create over/under illusion) */
-  const bridgeStrand=document.createElementNS('http://www.w3.org/2000/svg','path');
-  bridgeStrand.setAttribute('d',
-    'M 4 -14 C 8 -6 8 8 4 14'
-  );
-  bridgeStrand.setAttribute('class','knot-strand');
-  bridgeStrand.setAttribute('stroke','#c4a35a');bridgeStrand.setAttribute('stroke-width','7');
-  bridgeStrand.dataset.phase='3b';
-
-  /* Phase 4: Left tail */
-  const tailL=document.createElementNS('http://www.w3.org/2000/svg','path');
-  tailL.setAttribute('d','M -14 42 C -18 56 -22 70 -16 82');
-  tailL.setAttribute('class','knot-tail');
-  tailL.setAttribute('stroke','#a0813a');tailL.setAttribute('stroke-width','4.5');
-  tailL.dataset.phase='4a';
-
-  /* Phase 4: Right tail */
-  const tailR=document.createElementNS('http://www.w3.org/2000/svg','path');
-  tailR.setAttribute('d','M 0 44 C 6 58 12 72 6 82');
-  tailR.setAttribute('class','knot-tail');
-  tailR.setAttribute('stroke','#c4a35a');tailR.setAttribute('stroke-width','4.5');
-  tailR.dataset.phase='4b';
-
-  /* Add glow filter for the knot */
-  const defs=document.createElementNS('http://www.w3.org/2000/svg','defs');
-  const filter=document.createElementNS('http://www.w3.org/2000/svg','filter');
-  filter.setAttribute('id','knot-glow');filter.setAttribute('x','-50%');filter.setAttribute('y','-50%');
-  filter.setAttribute('width','200%');filter.setAttribute('height','200%');
-  const blur=document.createElementNS('http://www.w3.org/2000/svg','feGaussianBlur');
-  blur.setAttribute('in','SourceGraphic');blur.setAttribute('stdDeviation','3');blur.setAttribute('result','blur');
-  const merge=document.createElementNS('http://www.w3.org/2000/svg','feMerge');
-  const mn1=document.createElementNS('http://www.w3.org/2000/svg','feMergeNode');
-  mn1.setAttribute('in','blur');
-  const mn2=document.createElementNS('http://www.w3.org/2000/svg','feMergeNode');
-  mn2.setAttribute('in','SourceGraphic');
-  merge.appendChild(mn1);merge.appendChild(mn2);
-  filter.appendChild(blur);filter.appendChild(merge);
-  defs.appendChild(filter);
-  svg.insertBefore(defs,svg.firstChild);
-
-  /* Add all strands with glow */
-  const allStrands=[backStrand,loopStrand,overStrand,bridgeStrand,tailL,tailR];
-  allStrands.forEach(s=>{
-    s.setAttribute('filter','url(#knot-glow)');
-    svg.appendChild(s);
-  });
-
-  /* Prepare stroke-dashoffset animation */
-  allStrands.forEach(s=>{
-    const len=s.getTotalLength();
-    s.style.strokeDasharray=len;
-    s.style.strokeDashoffset=len;
-  });
-}
-
-function drawStrand(selector,delay,duration){
-  const el=document.querySelector(selector);
-  if(!el)return;
-  setTimeout(()=>{
-    el.style.transition=`stroke-dashoffset ${duration}ms cubic-bezier(0.16,1,0.3,1)`;
-    el.style.strokeDashoffset='0';
-  },delay);
-}
-
 function triggerKnot(){
   knotAnimDone=true;
   const knotWrap=document.getElementById('knot-wrap');
   const knotLabel=document.getElementById('knot-label');
   const prompt=document.getElementById('prompt');
 
-  fadeAudio(0,2000);
-
-  /* Phase 0: Appear with bounce */
+  knotLabel.textContent='yours.';
   knotWrap.classList.add('visible');
-
-  /* Phase 1: Back strand draws (the rope going behind) */
-  drawStrand('[data-phase="1"]',300,800);
-
-  /* Phase 2: Loop strand draws (forming the bight) */
-  drawStrand('[data-phase="2"]',700,700);
-
-  /* Phase 3: Over strand draws (passing through the loop) */
-  drawStrand('[data-phase="3"]',1100,600);
-
-  /* Phase 3b: Bridge strand (over/under crossing illusion) */
-  drawStrand('[data-phase="3b"]',1400,300);
-
-  /* Phase 4: Tails draw downward */
-  drawStrand('[data-phase="4a"]',1700,500);
-  drawStrand('[data-phase="4b"]',1900,400);
-
-  /* Phase 5: Tighten animation */
-  setTimeout(()=>{knotWrap.classList.remove('visible');knotWrap.classList.add('tighten');},2300);
-  setTimeout(()=>{
-    knotWrap.classList.remove('tighten');
-    knotWrap.classList.add('settled');
-  },2900);
-
-  /* Phase 6: Label and prompt */
-  setTimeout(()=>{knotLabel.textContent='yours.';knotLabel.classList.add('visible');},3000);
-  setTimeout(()=>{prompt.textContent='click anywhere to continue';prompt.classList.add('visible');},4200);
+  knotLabel.classList.add('visible');
+  prompt.textContent='click anywhere to continue';
+  prompt.classList.add('visible');
 }
 
 function initAudio(){
