@@ -505,12 +505,11 @@
     }
   })();
 
-  /* ── Audio: continue theme from page-03 ──────── */
+  /* ── Audio: continue theme from previous pages ─ */
   (function initAudio() {
     const audio = document.getElementById('theme-audio');
     if (!audio) return;
 
-    const shouldPlay = localStorage.getItem('hilo-audio') === 'playing';
     audio.volume = 0.55;
 
     function resume() {
@@ -519,14 +518,11 @@
       }
     }
 
-    if (shouldPlay) {
-      resume();
-      document.addEventListener('click', resume, { once: true });
-      document.addEventListener('touchstart', resume, { once: true });
-      document.addEventListener('scroll', resume, { once: true });
-    }
+    resume();
+    document.addEventListener('click', resume, { once: true });
+    document.addEventListener('touchstart', resume, { once: true });
+    document.addEventListener('scroll', resume, { once: true });
 
-    // keep flag fresh if user manually toggles here later
     audio.addEventListener('play', () => localStorage.setItem('hilo-audio', 'playing'));
     audio.addEventListener('pause', () => {
       if (audio.currentTime < audio.duration - 0.3) {

@@ -245,6 +245,9 @@
   <p id="subtitle">Click anywhere to continue</p>
   <div id="fade-overlay" aria-hidden="true"></div>
 
+  <audio id="theme-audio" loop preload="auto">
+    <source src="./assets/theme.mp3" type="audio/mpeg">
+  </audio>
 
   <script src="./trail.js"></script>
   <script>
@@ -455,6 +458,27 @@
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reducedMotion) { subtitle.style.opacity = '0.5'; return; }
     setTimeout(() => subtitle.classList.add('breathing'), 3400);
+  })();
+
+  /* ── Audio — starts on first click and persists across pages ── */
+  (function initAudio() {
+    const audio = document.getElementById('theme-audio');
+    if (!audio) return;
+    audio.volume = 0.55;
+
+    const tryPlay = () => {
+      if (audio.paused) {
+        audio.play().then(() => {
+          localStorage.setItem('hilo-audio', 'playing');
+        }).catch(() => {});
+      }
+    };
+
+    // try immediately (may fail without gesture, then retry on interaction)
+    tryPlay();
+    document.addEventListener('click', tryPlay, { once: true });
+    document.addEventListener('touchstart', tryPlay, { once: true });
+    document.addEventListener('scroll', tryPlay, { once: true });
   })();
 
   /* ── Click Through ──────────────────────────── */

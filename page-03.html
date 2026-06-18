@@ -598,6 +598,7 @@ function buildScene(){
   document.addEventListener('click',()=>{
     if(!knotAnimDone)return;
     fadeEl.style.pointerEvents='auto';fadeEl.style.opacity='1';
+    localStorage.setItem('hilo-audio','playing');
     setTimeout(()=>{window.location.href='page-04.html';},620);
   });
 }

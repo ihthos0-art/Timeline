@@ -404,6 +404,10 @@
 
   <div class="vignette"></div>
 
+  <audio id="theme-audio" loop preload="auto">
+    <source src="./assets/theme.mp3" type="audio/mpeg">
+  </audio>
+
   <div id="stage">
     <div class="slider">
       <button class="slider-btn slider-btn-prev" aria-label="Previous">
@@ -522,6 +526,20 @@
 
   <script src="./trail.js"></script>
   <script>
+  /* ── Audio — continues from landing page ── */
+  (function initAudio() {
+    const audio = document.getElementById('theme-audio');
+    if (!audio) return;
+    audio.volume = 0.55;
+    const resume = () => {
+      if (audio.paused) audio.play().catch(() => {});
+    };
+    resume();
+    document.addEventListener('click', resume, { once: true });
+    document.addEventListener('touchstart', resume, { once: true });
+    document.addEventListener('scroll', resume, { once: true });
+  })();
+
   /* ── Background ── */
   (function(){
     const cv=document.getElementById('bg-canvas'), cx=cv.getContext('2d');
