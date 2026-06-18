@@ -425,23 +425,34 @@
             <div class="slide__inner">
               <div class="glare"></div>
               <div class="slide--image__wrapper">
-                <img class="slide--image" src="./assets/minecraft-world.jpg" alt="Minecraft world" />
+                <img class="slide--image" src="./assets/page2-01.png" alt="Memory one" />
                 <div class="slide--image-tint"></div>
               </div>
             </div>
           </div>
-          <div class="slide__bg" style="--bg-img: url(./assets/minecraft-world.jpg)" data-next></div>
+          <div class="slide__bg" style="--bg-img: url(./assets/page2-01.png)" data-next></div>
 
           <div class="slide" data-previous>
             <div class="slide__inner">
               <div class="glare"></div>
               <div class="slide--image__wrapper">
-                <img class="slide--image" src="./assets/minimal-site.jpg" alt="Minimal website" />
+                <img class="slide--image" src="./assets/page2-02.png" alt="Memory two" />
                 <div class="slide--image-tint"></div>
               </div>
             </div>
           </div>
-          <div class="slide__bg" style="--bg-img: url(./assets/minimal-site.jpg)" data-previous></div>
+          <div class="slide__bg" style="--bg-img: url(./assets/page2-02.png)" data-previous></div>
+
+          <div class="slide">
+            <div class="slide__inner">
+              <div class="glare"></div>
+              <div class="slide--image__wrapper">
+                <img class="slide--image" src="./assets/page2-03.png" alt="Memory three" />
+                <div class="slide--image-tint"></div>
+              </div>
+            </div>
+          </div>
+          <div class="slide__bg" style="--bg-img: url(./assets/page2-03.png)"></div>
 
           <div class="slide">
             <div class="slide__inner text-card">
@@ -463,16 +474,23 @@
         </div>
         <div class="slide-info" data-next>
           <div class="slide-info--text__wrapper">
-            <div data-title class="slide-info--text"><span>Minecraft World</span></div>
-            <div data-subtitle class="slide-info--text"><span>Building Together</span></div>
-            <div data-description class="slide-info--text"><span>where i put your pictures</span></div>
+            <div data-title class="slide-info--text"><span>First Memory</span></div>
+            <div data-subtitle class="slide-info--text"><span>Where it began</span></div>
+            <div data-description class="slide-info--text"><span>the first thing i built for you</span></div>
           </div>
         </div>
         <div class="slide-info" data-previous>
           <div class="slide-info--text__wrapper">
-            <div data-title class="slide-info--text"><span>Minimal Design</span></div>
-            <div data-subtitle class="slide-info--text"><span>Video Edit</span></div>
-            <div data-description class="slide-info--text"><span>a website with a video edit of you</span></div>
+            <div data-title class="slide-info--text"><span>Second Memory</span></div>
+            <div data-subtitle class="slide-info--text"><span>Still building</span></div>
+            <div data-description class="slide-info--text"><span>another little world with you in it</span></div>
+          </div>
+        </div>
+        <div class="slide-info">
+          <div class="slide-info--text__wrapper">
+            <div data-title class="slide-info--text"><span>Third Memory</span></div>
+            <div data-subtitle class="slide-info--text"><span>Closer now</span></div>
+            <div data-description class="slide-info--text"><span>every step led here</span></div>
           </div>
         </div>
         <div class="slide-info">
@@ -494,6 +512,7 @@
       <div class="progress-dot" data-idx="1"></div>
       <div class="progress-dot" data-idx="2"></div>
       <div class="progress-dot" data-idx="3"></div>
+      <div class="progress-dot" data-idx="4"></div>
     </div>
     <p id="prompt"></p>
   </div>
@@ -562,7 +581,7 @@
   /* ════════════════════════════════════════
      3D PARALLAX SLIDER
      ════════════════════════════════════════ */
-  const TOTAL=4;
+  const TOTAL=5;
   let currentIdx=0, busy=false;
   const tiltTargets=[];
 
