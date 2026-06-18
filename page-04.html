@@ -80,6 +80,11 @@
       width: 100%;
     }
 
+    #anniversary-wrap, #anniversary-title, .hero, .letter-section, .letter-card {
+      position: relative;
+      z-index: 12;
+    }
+
     /* ── Hero Section ───────────────────────────── */
     .hero {
       position: relative;
@@ -109,6 +114,7 @@
       letter-spacing: -0.01em;
       text-transform: lowercase;
 
+      color: var(--gold-light);
       background: linear-gradient(
         145deg,
         #fff8ef           0%,
@@ -529,8 +535,20 @@
     });
   })();
 
+  /* ── Fallback: ensure title is visible even if animation stalls ── */
+  (function titleFallback() {
+    const title = document.getElementById('anniversary-title');
+    setTimeout(() => {
+      if (window.getComputedStyle(title).opacity === '0') {
+        title.style.opacity = '1';
+        title.style.transform = 'none';
+      }
+    }, 2500);
+  })();
+
   /* ── Three.js heart constellation with ducks/stanleys/koalas ── */
   (function initHeartConstellation() {
+    try {
     if (!window.THREE) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
@@ -628,6 +646,7 @@
       camera.updateProjectionMatrix();
       renderer.setSize(innerWidth, innerHeight);
     });
+    } catch (e) { console.warn('Heart constellation skipped:', e); }
   })();
 
   /* ── Page Fade-in ─────────────────────────────── */
