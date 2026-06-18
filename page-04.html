@@ -333,6 +333,12 @@
 
   <div id="fade-overlay" aria-hidden="true"></div>
 
+  <audio id="theme-audio" loop preload="auto">
+    <source src="./assets/theme.mp3" type="audio/mpeg">
+  </audio>
+
+  <script src="./trail.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script>
   /* ── Animated Background ────────────────────── */
   (function initBg() {
@@ -445,19 +451,166 @@
   /* ── Letter Reveal on Scroll ─────────────────── */
   (function initLetterReveal() {
     const card = document.getElementById('letter-card');
+    const body = document.querySelector('.letter-body');
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       card.classList.add('visible');
       return;
     }
+
+    const originalText = body.innerText.trim();
+    body.textContent = '';
+    body.style.opacity = '1';
+
+    let revealed = false;
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
-        if (entry.isIntersecting) {
+        if (entry.isIntersecting && !revealed) {
+          revealed = true;
           card.classList.add('visible');
+          setTimeout(startTypewriter, 700);
           observer.unobserve(card);
         }
       });
     }, { threshold: 0.22, rootMargin: '0px 0px -60px 0px' });
     observer.observe(card);
+
+    function startTypewriter() {
+      let i = 0;
+      const speed = 42;
+      function tick() {
+        if (i < originalText.length) {
+          body.textContent += originalText.charAt(i);
+          i++;
+          setTimeout(tick, speed);
+        }
+      }
+      tick();
+    }
+  })();
+
+  /* ── Audio: loop theme and resume if stopped ──── */
+  (function initAudio() {
+    const audio = document.getElementById('theme-audio');
+    if (!audio) return;
+    audio.volume = 0.55;
+
+    function play() {
+      audio.play().catch(() => {});
+    }
+
+    audio.addEventListener('pause', () => {
+      if (audio.currentTime < audio.duration - 0.5) {
+        setTimeout(play, 100);
+      }
+    });
+
+    audio.addEventListener('ended', () => {
+      audio.currentTime = 0;
+      play();
+    });
+
+    document.addEventListener('click', play, { once: true });
+    document.addEventListener('touchstart', play, { once: true });
+    document.addEventListener('scroll', play, { once: true });
+  })();
+
+  /* ── Three.js heart constellation with ducks/stanleys/koalas ── */
+  (function initHeartConstellation() {
+    if (!window.THREE) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 1000);
+    camera.position.z = 18;
+
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setSize(innerWidth, innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.domElement.style.position = 'fixed';
+    renderer.domElement.style.inset = '0';
+    renderer.domElement.style.zIndex = '1';
+    renderer.domElement.style.pointerEvents = 'none';
+    document.body.insertBefore(renderer.domElement, document.body.firstChild);
+
+    const loader = new THREE.TextureLoader();
+    const textures = [
+      loader.load('./assets/duck1.png'),
+      loader.load('./assets/stanley.png'),
+      loader.load('./assets/koala.png')
+    ];
+
+    const heartShape = [];
+    const count = 60;
+    for (let i = 0; i < count; i++) {
+      const t = (i / count) * Math.PI * 2;
+      const x = 16 * Math.pow(Math.sin(t), 3);
+      const y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
+      heartShape.push({ x: x * 0.35, y: y * 0.35, z: (Math.random() - 0.5) * 4 });
+    }
+
+    const group = new THREE.Group();
+    heartShape.forEach((pt, i) => {
+      const mat = new THREE.SpriteMaterial({ map: textures[i % 3], transparent: true, opacity: 0.75 });
+      const sprite = new THREE.Sprite(mat);
+      sprite.position.set(pt.x, pt.y, pt.z);
+      const scale = 0.6 + Math.random() * 0.5;
+      sprite.scale.set(scale, scale, 1);
+      sprite.userData = {
+        baseX: pt.x,
+        baseY: pt.y,
+        baseZ: pt.z,
+        phase: Math.random() * Math.PI * 2,
+        speed: 0.3 + Math.random() * 0.4
+      };
+      group.add(sprite);
+    });
+
+    const ambientParticles = [];
+    const particleGeo = new THREE.BufferGeometry();
+    const particleCount = 80;
+    const positions = new Float32Array(particleCount * 3);
+    for (let i = 0; i < particleCount; i++) {
+      positions[i * 3] = (Math.random() - 0.5) * 30;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 22;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 10 - 2;
+    }
+    particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const particleMat = new THREE.PointsMaterial({ color: 0xc9a84c, size: 0.12, transparent: true, opacity: 0.5 });
+    const particles = new THREE.Points(particleGeo, particleMat);
+    scene.add(particles);
+    scene.add(group);
+
+    let mouseX = 0, mouseY = 0;
+    document.addEventListener('mousemove', e => {
+      mouseX = (e.clientX / innerWidth - 0.5) * 2;
+      mouseY = (e.clientY / innerHeight - 0.5) * 2;
+    }, { passive: true });
+
+    let time = 0;
+    function animate() {
+      requestAnimationFrame(animate);
+      time += 0.008;
+      group.rotation.y = Math.sin(time * 0.3) * 0.15;
+      group.rotation.z = Math.sin(time * 0.2) * 0.03;
+      group.children.forEach(sprite => {
+        const u = sprite.userData;
+        sprite.position.x = u.baseX + Math.sin(time * u.speed + u.phase) * 0.4;
+        sprite.position.y = u.baseY + Math.cos(time * u.speed + u.phase) * 0.3;
+        sprite.position.z = u.baseZ + Math.sin(time * u.speed * 0.7 + u.phase) * 0.6;
+      });
+      camera.position.x += (mouseX * 1.5 - camera.position.x) * 0.03;
+      camera.position.y += (-mouseY * 1.2 - camera.position.y) * 0.03;
+      camera.lookAt(0, 0, 0);
+      particles.rotation.y += 0.001;
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera.aspect = innerWidth / innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(innerWidth, innerHeight);
+    });
   })();
 
   /* ── Page Fade-in ─────────────────────────────── */
