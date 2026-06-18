@@ -21,17 +21,17 @@
   style.textContent = `
     .trail-item {
       position: absolute;
-      width: clamp(22px, 5vw, 42px);
+      width: clamp(44px, 10vw, 84px);
       height: auto;
       opacity: 0.85;
       transform: translate(-50%, -50%) scale(0.6);
       will-change: transform, opacity;
       user-select: none;
-      filter: drop-shadow(0 2px 6px rgba(0,0,0,0.35));
+      filter: drop-shadow(0 3px 10px rgba(0,0,0,0.35));
     }
     @keyframes trailFloat {
-      0% { transform: translate(-50%, -50%) scale(0.55) rotate(var(--rot)); opacity: 0.85; }
-      100% { transform: translate(-50%, calc(-50% - 60px)) scale(0.25) rotate(calc(var(--rot) + 25deg)); opacity: 0; }
+      0% { transform: translate(-50%, -50%) scale(0.9) rotate(var(--rot)); opacity: 0.85; }
+      100% { transform: translate(-50%, calc(-50% - 90px)) scale(0.45) rotate(calc(var(--rot) + 25deg)); opacity: 0; }
     }
   `;
   document.head.appendChild(style);
