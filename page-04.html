@@ -474,7 +474,7 @@
       if (typingInterval) return;
       card.classList.add('visible');
       let i = 0;
-      const speed = 38;
+      const speed = 85;
       typingInterval = setInterval(() => {
         if (i >= originalText.length) {
           clearInterval(typingInterval);
@@ -554,14 +554,15 @@
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 1000);
-    camera.position.z = 18;
+    camera.position.z = 26;
 
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setSize(innerWidth, innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.domElement.id = 'heart-canvas';
     renderer.domElement.style.position = 'fixed';
     renderer.domElement.style.inset = '0';
-    renderer.domElement.style.zIndex = '-1';
+    renderer.domElement.style.zIndex = '1';
     renderer.domElement.style.pointerEvents = 'none';
     document.body.appendChild(renderer.domElement);
 
@@ -573,22 +574,22 @@
     ];
 
     const heartShape = [];
-    const count = 90;
+    const count = 110;
     for (let i = 0; i < count; i++) {
       const t = (i / count) * Math.PI * 2;
       const x = 16 * Math.pow(Math.sin(t), 3);
       const y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
       // fill inside the heart a bit too
-      const fill = Math.random() < 0.35 ? Math.random() * 0.35 : 0;
-      heartShape.push({ x: x * (0.42 - fill), y: y * (0.42 - fill), z: (Math.random() - 0.5) * 6 });
+      const fill = Math.random() < 0.45 ? Math.random() * 0.42 : 0;
+      heartShape.push({ x: x * (0.85 - fill), y: y * (0.85 - fill) - 1.5, z: (Math.random() - 0.5) * 8 });
     }
 
     const group = new THREE.Group();
     heartShape.forEach((pt, i) => {
-      const mat = new THREE.SpriteMaterial({ map: textures[i % 3], transparent: true, opacity: 0.9 });
+      const mat = new THREE.SpriteMaterial({ map: textures[i % 3], transparent: true, opacity: 1.0 });
       const sprite = new THREE.Sprite(mat);
       sprite.position.set(pt.x, pt.y, pt.z);
-      const scale = 0.9 + Math.random() * 0.9;
+      const scale = 2.2 + Math.random() * 2.2;
       sprite.scale.set(scale, scale, 1);
       sprite.userData = {
         baseX: pt.x,
@@ -602,15 +603,15 @@
 
     const ambientParticles = [];
     const particleGeo = new THREE.BufferGeometry();
-    const particleCount = 80;
+    const particleCount = 140;
     const positions = new Float32Array(particleCount * 3);
     for (let i = 0; i < particleCount; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 30;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 22;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 10 - 2;
+      positions[i * 3] = (Math.random() - 0.5) * 40;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 30;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 12 - 4;
     }
     particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    const particleMat = new THREE.PointsMaterial({ color: 0xe8c97a, size: 0.18, transparent: true, opacity: 0.7 });
+    const particleMat = new THREE.PointsMaterial({ color: 0xe8c97a, size: 0.28, transparent: true, opacity: 0.85 });
     const particles = new THREE.Points(particleGeo, particleMat);
     scene.add(particles);
     scene.add(group);
