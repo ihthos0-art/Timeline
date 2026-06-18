@@ -543,9 +543,9 @@
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.domElement.style.position = 'fixed';
     renderer.domElement.style.inset = '0';
-    renderer.domElement.style.zIndex = '1';
+    renderer.domElement.style.zIndex = '-1';
     renderer.domElement.style.pointerEvents = 'none';
-    document.body.insertBefore(renderer.domElement, document.body.firstChild);
+    document.body.appendChild(renderer.domElement);
 
     const loader = new THREE.TextureLoader();
     const textures = [
