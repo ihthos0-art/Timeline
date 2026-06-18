@@ -462,56 +462,71 @@
     body.style.opacity = '1';
 
     let revealed = false;
+    let typingInterval = null;
+
+    function startTypewriter() {
+      if (typingInterval) return;
+      card.classList.add('visible');
+      let i = 0;
+      const speed = 38;
+      typingInterval = setInterval(() => {
+        if (i >= originalText.length) {
+          clearInterval(typingInterval);
+          typingInterval = null;
+          return;
+        }
+        body.textContent += originalText.charAt(i);
+        i++;
+      }, speed);
+    }
+
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting && !revealed) {
           revealed = true;
-          card.classList.add('visible');
-          setTimeout(startTypewriter, 700);
+          setTimeout(startTypewriter, 400);
           observer.unobserve(card);
         }
       });
-    }, { threshold: 0.22, rootMargin: '0px 0px -60px 0px' });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
     observer.observe(card);
 
-    function startTypewriter() {
-      let i = 0;
-      const speed = 42;
-      function tick() {
-        if (i < originalText.length) {
-          body.textContent += originalText.charAt(i);
-          i++;
-          setTimeout(tick, speed);
-        }
-      }
-      tick();
+    // if letter is already in view on load, start immediately
+    const rect = card.getBoundingClientRect();
+    if (rect.top < innerHeight && rect.bottom > 0 && !revealed) {
+      revealed = true;
+      setTimeout(startTypewriter, 700);
     }
   })();
 
-  /* ── Audio: loop theme and resume if stopped ──── */
+  /* ── Audio: continue theme from page-03 ──────── */
   (function initAudio() {
     const audio = document.getElementById('theme-audio');
     if (!audio) return;
+
+    const shouldPlay = localStorage.getItem('hilo-audio') === 'playing';
     audio.volume = 0.55;
 
-    function play() {
-      audio.play().catch(() => {});
+    function resume() {
+      if (audio.paused) {
+        audio.play().catch(() => {});
+      }
     }
 
+    if (shouldPlay) {
+      resume();
+      document.addEventListener('click', resume, { once: true });
+      document.addEventListener('touchstart', resume, { once: true });
+      document.addEventListener('scroll', resume, { once: true });
+    }
+
+    // keep flag fresh if user manually toggles here later
+    audio.addEventListener('play', () => localStorage.setItem('hilo-audio', 'playing'));
     audio.addEventListener('pause', () => {
-      if (audio.currentTime < audio.duration - 0.5) {
-        setTimeout(play, 100);
+      if (audio.currentTime < audio.duration - 0.3) {
+        localStorage.setItem('hilo-audio', 'paused');
       }
     });
-
-    audio.addEventListener('ended', () => {
-      audio.currentTime = 0;
-      play();
-    });
-
-    document.addEventListener('click', play, { once: true });
-    document.addEventListener('touchstart', play, { once: true });
-    document.addEventListener('scroll', play, { once: true });
   })();
 
   /* ── Three.js heart constellation with ducks/stanleys/koalas ── */
@@ -540,27 +555,29 @@
     ];
 
     const heartShape = [];
-    const count = 60;
+    const count = 90;
     for (let i = 0; i < count; i++) {
       const t = (i / count) * Math.PI * 2;
       const x = 16 * Math.pow(Math.sin(t), 3);
       const y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
-      heartShape.push({ x: x * 0.35, y: y * 0.35, z: (Math.random() - 0.5) * 4 });
+      // fill inside the heart a bit too
+      const fill = Math.random() < 0.35 ? Math.random() * 0.35 : 0;
+      heartShape.push({ x: x * (0.42 - fill), y: y * (0.42 - fill), z: (Math.random() - 0.5) * 6 });
     }
 
     const group = new THREE.Group();
     heartShape.forEach((pt, i) => {
-      const mat = new THREE.SpriteMaterial({ map: textures[i % 3], transparent: true, opacity: 0.75 });
+      const mat = new THREE.SpriteMaterial({ map: textures[i % 3], transparent: true, opacity: 0.9 });
       const sprite = new THREE.Sprite(mat);
       sprite.position.set(pt.x, pt.y, pt.z);
-      const scale = 0.6 + Math.random() * 0.5;
+      const scale = 0.9 + Math.random() * 0.9;
       sprite.scale.set(scale, scale, 1);
       sprite.userData = {
         baseX: pt.x,
         baseY: pt.y,
         baseZ: pt.z,
         phase: Math.random() * Math.PI * 2,
-        speed: 0.3 + Math.random() * 0.4
+        speed: 0.25 + Math.random() * 0.35
       };
       group.add(sprite);
     });
@@ -575,7 +592,7 @@
       positions[i * 3 + 2] = (Math.random() - 0.5) * 10 - 2;
     }
     particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    const particleMat = new THREE.PointsMaterial({ color: 0xc9a84c, size: 0.12, transparent: true, opacity: 0.5 });
+    const particleMat = new THREE.PointsMaterial({ color: 0xe8c97a, size: 0.18, transparent: true, opacity: 0.7 });
     const particles = new THREE.Points(particleGeo, particleMat);
     scene.add(particles);
     scene.add(group);

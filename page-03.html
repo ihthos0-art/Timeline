@@ -592,7 +592,6 @@ function buildScene(){
   document.addEventListener('click',()=>{
     if(!knotAnimDone)return;
     fadeEl.style.pointerEvents='auto';fadeEl.style.opacity='1';
-    fadeAudio(0,600);
     setTimeout(()=>{window.location.href='page-04.html';},620);
   });
 }
@@ -632,14 +631,14 @@ function initAudio(){
   audioEl.volume=0;
   const play=audioEl.play();
   if(play instanceof Promise){
-    play.then(()=>{fadeAudio(0.6,2000);playing=true;btn.textContent='♪ pause';}).catch(()=>{
+    play.then(()=>{fadeAudio(0.6,2000);playing=true;localStorage.setItem('hilo-audio','playing');btn.textContent='♪ pause';}).catch(()=>{
       btn.textContent='♪ play';
     });
   }
   btn.addEventListener('click',e=>{
     e.stopPropagation();
-    if(playing){audioEl.pause();playing=false;btn.textContent='♪ play';}
-    else{audioEl.play();fadeAudio(0.6,800);playing=true;btn.textContent='♪ pause';}
+    if(playing){audioEl.pause();playing=false;localStorage.setItem('hilo-audio','paused');btn.textContent='♪ play';}
+    else{audioEl.play();fadeAudio(0.6,800);playing=true;localStorage.setItem('hilo-audio','playing');btn.textContent='♪ pause';}
   });
 }
 
