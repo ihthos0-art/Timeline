@@ -203,11 +203,9 @@
       background: var(--card-bg);
       border: 1px solid var(--card-bdr);
       box-shadow:
-        inset 0 0 80px rgba(201,168,76,0.06),
-        0 40px 100px rgba(0,0,0,0.7),
-        0 0 80px rgba(201,168,76,0.08);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+        inset 0 0 60px rgba(201,168,76,0.05),
+        0 30px 70px rgba(0,0,0,0.6),
+        0 0 40px rgba(201,168,76,0.08);
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
       padding: 44px 36px; gap: 20px;
@@ -216,26 +214,17 @@
     }
     .slide__inner.text-card::before {
       content: '';
-      position: absolute; inset: -2px;
-      border-radius: 14px;
-      background: conic-gradient(from var(--shimmer-angle, 0deg),
-        transparent 0%, rgba(201,168,76,0.35) 10%, transparent 20%);
+      position: absolute; inset: 0;
+      border-radius: inherit;
+      border: 1px solid rgba(201,168,76,0.22);
+      pointer-events: none;
       z-index: -1;
-      animation: shimmerRotate 4s linear infinite;
-    }
-    @keyframes shimmerRotate {
-      to { --shimmer-angle: 360deg; }
-    }
-    @property --shimmer-angle {
-      syntax: '<angle>';
-      initial-value: 0deg;
-      inherits: false;
     }
     .slide[data-current] .slide__inner.text-card {
       box-shadow:
-        inset 0 0 80px rgba(201,168,76,0.09),
-        0 40px 100px rgba(0,0,0,0.7),
-        0 0 80px rgba(201,168,76,0.12);
+        inset 0 0 70px rgba(201,168,76,0.07),
+        0 30px 70px rgba(0,0,0,0.6),
+        0 0 50px rgba(201,168,76,0.10);
     }
 
     .slide--image__wrapper {
@@ -358,9 +347,7 @@
     }
     .slide__bg::before {
       content: ""; position: absolute; inset: 0;
-      background: rgba(13, 10, 14, 0.85);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      background: rgba(13, 10, 14, 0.92);
     }
     .slide__bg:not([data-current]):not([data-next]):not([data-previous]) { opacity: 0; }
     .slide__bg[data-current] { opacity: 1; transform: translateX(0); }
@@ -569,7 +556,7 @@
 
   /* ── Grain ── */
   (function(){const t=document.getElementById('gt');let s=7;
-    setInterval(()=>{s=(s%199)+1;t.setAttribute('seed',s);},80);
+    setInterval(()=>{s=(s%199)+1;t.setAttribute('seed',s);},250);
   })();
 
   /* ════════════════════════════════════════

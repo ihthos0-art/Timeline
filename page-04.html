@@ -123,14 +123,11 @@
       background-clip: text;
 
       filter:
-        drop-shadow(0 0 70px rgba(201, 168, 76, 0.35))
-        drop-shadow(0 0 140px rgba(201, 168, 76, 0.16))
-        drop-shadow(0 10px 40px rgba(0, 0, 0, 0.95));
+        drop-shadow(0 0 45px rgba(201, 168, 76, 0.3));
 
       will-change: transform;
       opacity: 0;
-      animation: titleDrop 1.7s cubic-bezier(0.22, 1, 0.36, 1) 0.25s both,
-                 shimmer 6s ease-in-out 2.5s infinite;
+      animation: titleDrop 1.7s cubic-bezier(0.22, 1, 0.36, 1) 0.25s both;
     }
 
     @keyframes titleDrop {
@@ -196,11 +193,9 @@
       border-radius: 18px;
       padding: clamp(40px, 7vw, 72px) clamp(36px, 5vw, 64px);
       box-shadow:
-        inset 0 0 80px rgba(201,168,76,0.06),
-        0 40px 100px rgba(0,0,0,0.7),
-        0 0 80px rgba(201,168,76,0.08);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+        inset 0 0 60px rgba(201,168,76,0.05),
+        0 30px 70px rgba(0,0,0,0.6),
+        0 0 40px rgba(201,168,76,0.08);
       overflow: hidden;
       opacity: 0;
       transform: translateY(60px);
@@ -214,20 +209,11 @@
 
     .letter-card::before {
       content: '';
-      position: absolute; inset: -2px;
-      border-radius: 20px;
-      background: conic-gradient(from var(--shimmer-angle, 0deg),
-        transparent 0%, rgba(201,168,76,0.35) 10%, transparent 20%);
+      position: absolute; inset: 0;
+      border-radius: inherit;
+      border: 1px solid rgba(201,168,76,0.22);
+      pointer-events: none;
       z-index: -1;
-      animation: shimmerRotate 4s linear infinite;
-    }
-    @keyframes shimmerRotate {
-      to { --shimmer-angle: 360deg; }
-    }
-    @property --shimmer-angle {
-      syntax: '<angle>';
-      initial-value: 0deg;
-      inherits: false;
     }
 
     .letter-card::after {
@@ -235,7 +221,7 @@
       position: absolute;
       top: -60%; left: -60%;
       width: 220%; height: 220%;
-      background: radial-gradient(circle at 50% 30%, rgba(255,230,160,0.06) 0%, transparent 55%);
+      background: radial-gradient(circle at 50% 30%, rgba(255,230,160,0.05) 0%, transparent 55%);
       pointer-events: none;
       z-index: 0;
     }
@@ -455,7 +441,7 @@
   (function initGrain() {
     const turb = document.getElementById('grain-turbulence');
     let seed = 5;
-    setInterval(() => { seed = (seed % 199) + 1; turb.setAttribute('seed', seed); }, 80);
+    setInterval(() => { seed = (seed % 199) + 1; turb.setAttribute('seed', seed); }, 250);
   })();
 
   /* ── Letter Reveal on Scroll ─────────────────── */
